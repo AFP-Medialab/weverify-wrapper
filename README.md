@@ -1,4 +1,4 @@
-# Twint Wrapper
+# Weverify Wrapper
 
 Twint Wrapper is a java Spring Boot application that expose operations in front of [Twint](https://github.com/twintproject/twint) scraping tool.
 
