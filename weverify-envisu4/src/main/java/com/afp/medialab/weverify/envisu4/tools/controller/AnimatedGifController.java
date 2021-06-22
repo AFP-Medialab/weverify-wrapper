@@ -1,8 +1,6 @@
 package com.afp.medialab.weverify.envisu4.tools.controller;
 
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
-import java.net.URL;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
@@ -10,13 +8,13 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.imageio.IIOException;
-import javax.imageio.ImageIO;
 import javax.validation.Valid;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
@@ -42,7 +40,7 @@ import com.afp.medialab.weverify.envisu4.dao.repository.ImageDbRepository;
 import com.afp.medialab.weverify.envisu4.tools.controller.exception.AnimatedGifCreationException;
 import com.afp.medialab.weverify.envisu4.tools.controller.exception.Envisu4ServiceError;
 import com.afp.medialab.weverify.envisu4.tools.controller.exception.ServiceErrorCode;
-import com.afp.medialab.weverify.envisu4.tools.images.AnimatedGIFWriter;
+import com.afp.medialab.weverify.envisu4.tools.images.ICreateAnimatedGif;
 import com.afp.medialab.weverify.envisu4.tools.models.AnimatedGif;
 import com.afp.medialab.weverify.envisu4.tools.models.CreateAnimatedGifHistory;
 import com.afp.medialab.weverify.envisu4.tools.models.CreateAnimatedGifRequest;
@@ -58,27 +56,24 @@ public class AnimatedGifController {
 	@Autowired
 	private ImageDbRepository imageDbRepository;
 
+	@Autowired
+	@Qualifier("alphagGifWriter")
+	private ICreateAnimatedGif createAnimatedGif;
+
 	private static Logger Logger = LoggerFactory.getLogger(AnimatedGifController.class);
 
-	// @ApiOperation(value = "Create animated Gif")
 	@Operation(summary = "Create animated Gif", description = "Create an animated Gif from several image URLs")
-	@RequestMapping(path = { "/open/animated",
+	@RequestMapping(path = {
 			"/animated" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.IMAGE_GIF_VALUE)
 	public ResponseEntity<Resource> createAnimatedGifForURL(
 			@RequestBody @Valid CreateAnimatedGifRequest createAnimatedGifRequest) throws Exception {
 
 		Set<String> urls = createAnimatedGifRequest.getInputURLs();
 		int delay = createAnimatedGifRequest.getDelay();
-		AnimatedGIFWriter writer = new AnimatedGIFWriter(true);
+
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		try {
-			writer.prepareForWrite(output, -1, -1);
-			for (String url : urls) {
-				Logger.info("images url {}", url);
-				BufferedImage next = ImageIO.read(new URL(url));
-				writer.writeFrame(output, next, delay);
-			}
-			byte[] content = output.toByteArray();
+			byte[] content = createAnimatedGif.convert(urls, output, delay, true);
 			String md5sum = DigestUtils.md5Hex(content);
 			Optional<Image> storeImage = imageDbRepository.findByMd5sum(md5sum);
 			if (storeImage.isEmpty()) {
@@ -105,14 +100,12 @@ public class AnimatedGifController {
 			throw new AnimatedGifCreationException(ServiceErrorCode.ANIMATED_GIF_CREATION_FAILED,
 					"Error creating image ");
 		} finally {
-			writer.finishWrite(output);
 			output.close();
 		}
 	}
 
 	@Operation(summary = "get stored animated Gif", description = "Get animated Gif generated from database")
-	@RequestMapping(path = { "/animated/{imageId}",
-			"/open/animated/{imageId}" }, method = RequestMethod.GET, produces = MediaType.IMAGE_GIF_VALUE)
+	@RequestMapping(path = { "/animated/{imageId}" }, method = RequestMethod.GET, produces = MediaType.IMAGE_GIF_VALUE)
 	public Resource getImageFromId(@PathVariable String imageId) {
 		byte[] content = imageDbRepository.findByMd5sum(imageId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)).getContent();
@@ -121,8 +114,8 @@ public class AnimatedGifController {
 	}
 
 	@Operation(summary = "get create animated gif history")
-	@RequestMapping(path = { "/animated/history",
-			"/open/animated/history" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = {
+			"/animated/history" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public CreateAnimatedGifHistory getCreateImageHistory(
 			@RequestParam(value = "limit", required = false, defaultValue = "5") int limit) {
 		Pageable limitQuery = PageRequest.of(0, limit);

@@ -9,6 +9,7 @@
 	</parent>
 	<artifactId>weverify-envisu4</artifactId>
 	<name>weverify-envisu4</name>
+	<version>1.0.1</version>
 	<dependencies>
 		<dependency>
 			<groupId>com.afp.medialab.weverify</groupId>

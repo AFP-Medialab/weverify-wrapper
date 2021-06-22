@@ -18,7 +18,7 @@
 		<revision>2.2.0</revision>
 		<docker-maven-plugin.version>1.0.0</docker-maven-plugin.version>
 		<docker.image.name>${project.name}</docker.image.name>
-		<docker.image.tag>${revision}</docker.image.tag>
+		<docker.image.tag>2.2.1</docker.image.tag>
 	</properties>
 
 	<modules>
