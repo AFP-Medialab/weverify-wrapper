@@ -1,5 +1,16 @@
 CREATE DATABASE IF NOT EXISTS envisu4 CHARACTER SET utf8 COLLATE utf8_general_ci;
 GRANT ALL PRIVILEGES ON envisu4.* TO 'dev1'@'%';
+USE envisu4;
+
+CREATE TABLE `Image` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `content` longblob,
+  `creationDate` datetime(6) DEFAULT NULL,
+  `md5sum` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_l8y41hmk6f03smyyvvgcm1k2m` (`md5sum`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 CREATE DATABASE IF NOT EXISTS fusionauth CHARACTER SET utf8 COLLATE utf8_general_ci;
 
