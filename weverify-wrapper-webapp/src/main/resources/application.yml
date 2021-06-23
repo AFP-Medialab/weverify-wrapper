@@ -99,16 +99,14 @@ spring:
         enabled: false
 
 management:
- # server:
-  #  port: 8111
   endpoints:
-   enabled-by-default: false
-   web:
+    enabled-by-default: false
+    web:
       exposure:
         include:
-        - health
-        - info
-        - loggers
+          - health
+          - info
+          - loggers
       base-path: /manage
       
   endpoint:

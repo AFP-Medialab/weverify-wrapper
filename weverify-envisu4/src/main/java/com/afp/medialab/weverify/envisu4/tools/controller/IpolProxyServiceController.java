@@ -82,8 +82,8 @@ public class IpolProxyServiceController {
 	 * @return
 	 */
 	@Operation(summary = "homographic with files", description = "Call IPOL homographic service with uploaded files")
-	@RequestMapping(path = { "/ipol/homographic",
-			"/open/ipol/homographic" }, method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = {
+			"/ipol/homographic" }, method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<IpolHomographicResponse> homographicProcessCall(@RequestParam("file_0") MultipartFile file_0,
 			@RequestParam("file_1") MultipartFile file_1) {
 		FileSystemResource fileSysRs0 = new FileSystemResource(fileUtils.convert(file_0));
@@ -101,8 +101,8 @@ public class IpolProxyServiceController {
 	 */
 
 	@Operation(summary = "homographic with urls", description = "Call IPOL homographic service with image URL")
-	@RequestMapping(path = { "/ipol/homographic/url",
-			"/open/ipol/homographic/url" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@RequestMapping(path = {
+			"/ipol/homographic/url" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<IpolHomographicResponse> homographicProcessCall(@RequestParam("url_0") String url_0,
 			@RequestParam("url_1") String url_1) throws IpolProxyException {
 		try {
@@ -121,7 +121,7 @@ public class IpolProxyServiceController {
 	}
 
 	@Operation(summary = "Ipol homographic result image", description = "Get images results from IPOL service")
-	@RequestMapping(path = "/ipol/homographic/result/{key}/{image}", method = RequestMethod.GET, produces = {
+	@RequestMapping(path = IpolPathConstant.FULL_IPOL_RESULTS_PATH, method = RequestMethod.GET, produces = {
 			MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<Resource> downloadHomographicResults(@PathVariable String key,
 			@PathVariable IpolResultEnum image) throws IpolProxyException {
@@ -143,7 +143,6 @@ public class IpolProxyServiceController {
 			}
 
 		}
-
 	}
 
 	/**
@@ -178,9 +177,29 @@ public class IpolProxyServiceController {
 		ResponseEntity<IpolHomographicResponse> response = restTemplate
 				.postForEntity(ipolEndpoint + HOMOGRAPHIC_ENDPOINT, requestEntity, IpolHomographicResponse.class);
 
+		IpolHomographicResponse customResponse = buildResponse(response);
 		ResponseEntity<IpolHomographicResponse> responseEntity = new ResponseEntity<IpolHomographicResponse>(
-				response.getBody(), response.getStatusCode());
+				customResponse, response.getStatusCode());
 		return responseEntity;
+	}
+
+	/**
+	 * Add results path to response
+	 * 
+	 * @param response
+	 * @return
+	 */
+	private IpolHomographicResponse buildResponse(ResponseEntity<IpolHomographicResponse> response) {
+		IpolHomographicResponse ipolResponse = response.getBody();
+		String output0 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_0.png";
+		String output1 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_1.png";
+		String pano = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/pano.jpg";
+		String stdout = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/stdout.txt";
+		ipolResponse.getResults().setOutput0(output0);
+		ipolResponse.getResults().setOutput1(output1);
+		ipolResponse.getResults().setPano(pano);
+		ipolResponse.getResults().setStdout(stdout);
+		return ipolResponse;
 	}
 
 	@ExceptionHandler({ IpolProxyException.class })

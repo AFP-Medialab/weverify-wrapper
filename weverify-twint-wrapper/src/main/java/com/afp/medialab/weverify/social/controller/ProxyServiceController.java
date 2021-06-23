@@ -6,6 +6,9 @@ import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,7 +30,8 @@ public class ProxyServiceController {
 
 	@PostConstruct
 	private void init() {
-		this.esURL = esHost + ":" + esPort;
+
+		this.esURL = (esHost.startsWith("http") ? esHost : "http://" + esHost) + ":" + esPort;
 	}
 
 	@Autowired
@@ -41,10 +45,10 @@ public class ProxyServiceController {
 	}
 
 	@RequestMapping(path = "/api/search/getUsers", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<JSONObject> elasticCallUsers(@RequestBody JSONObject jsonObject) {
-
-		return restTemplate.postForEntity(esURL + "/tsnausers/_search", jsonObject, JSONObject.class);
+	public ResponseEntity<Resource> elasticCallUsers(@RequestBody Resource jsonObject) {
+		return restTemplate.exchange(esURL + "/tsnausers/_search", HttpMethod.POST, new HttpEntity<Resource>(jsonObject),
+				Resource.class);
+		 //restTemplate.postForEntity(esURL + "/tsnausers/_search", jsonObject, JSONObject.class);
 	}
 
-	
 }
