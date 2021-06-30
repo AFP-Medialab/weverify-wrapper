@@ -26,10 +26,5 @@
 			<artifactId>commons-io</artifactId>
 			<version>2.9.0</version>
 		</dependency>
-		<dependency>
-			<groupId>com.sksamuel.scrimage</groupId>
-			<artifactId>scrimage-core</artifactId>
-			<version>4.0.20</version>
-		</dependency>
 	</dependencies>
 </project>
