@@ -5,7 +5,6 @@ import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.imageio.IIOException;
 import javax.validation.Valid;
@@ -58,6 +57,7 @@ public class AnimatedGifController {
 
 	@Autowired
 	@Qualifier("alphagGifWriter")
+	//@Qualifier("animatedGifWriter")
 	private ICreateAnimatedGif createAnimatedGif;
 
 	private static Logger Logger = LoggerFactory.getLogger(AnimatedGifController.class);
@@ -68,7 +68,7 @@ public class AnimatedGifController {
 	public ResponseEntity<Resource> createAnimatedGifForURL(
 			@RequestBody @Valid CreateAnimatedGifRequest createAnimatedGifRequest) throws Exception {
 
-		Set<String> urls = createAnimatedGifRequest.getInputURLs();
+		String[] urls = createAnimatedGifRequest.getInputURLs();
 		int delay = createAnimatedGifRequest.getDelay();
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();

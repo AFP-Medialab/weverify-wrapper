@@ -25,12 +25,12 @@ import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
 
@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 /**
- * @deprecated
+ *
  * Create Animated Gif. => Issue with image using alpha transparency.
  * 
  * @author Bertrand Goupil
@@ -396,6 +396,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 		this.logicalScreenHeight = logicalScreenHeight;
 		// We are going to write animated GIF, so enable animated flag
 		animated = true;
+		firstFrame = true;
 	}
 
 	// Translate codes into bytes
@@ -578,6 +579,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 	}
 
 	public void writeFrame(OutputStream os, BufferedImage frame, int delay) throws Exception {
+		//#1
 		// Retrieve image dimension
 		int imageWidth = frame.getWidth();
 		int imageHeight = frame.getHeight();
@@ -599,6 +601,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 
 	private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition,
 			int delay, int disposalMethod, int userInputFlag, OutputStream os) throws Exception {
+		//#3
 		// Reset empty_bits
 		empty_bits = 0x08;
 
@@ -641,9 +644,11 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 			writeLSD(os, (short) logicalScreenWidth, (short) logicalScreenHeight, flags, bgcolor, aspectRatio);
 			// Write the global colorPalette
 			writePalette(os, num_of_color);
-			writeComment(os, "Created by ICAFE - https://github.com/dragon66/icafe");
-			if (animated)// Write Netscape extension block
+			writeComment(os, "Created by Weverify");
+			if (animated){// Write Netscape extension block
 				writeNetscapeApplicationBlock(os, loopCount);
+				
+			}
 		}
 
 		// Output the graphic control block
@@ -665,8 +670,9 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 
 	private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition,
 			int delay, OutputStream os) throws Exception {
+		//#2
 		writeFrame(pixels, imageWidth, imageHeight, imageLeftPosition, imageTopPosition, delay,
-				GIFFrame.DISPOSAL_RESTORE_TO_BACKGROUND, GIFFrame.USER_INPUT_NONE, os);
+				GIFFrame.DISPOSAL_UNSPECIFIED, GIFFrame.USER_INPUT_NONE, os);
 	}
 
 	// Unit of delay is supposed to be in millisecond
@@ -948,11 +954,13 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 		private int delay;
 		private int disposalMethod = DISPOSAL_UNSPECIFIED;
 		private int userInputFlag = USER_INPUT_NONE;
-		private int transparencyFlag = TRANSPARENCY_INDEX_NONE;
+		//private int transparencyFlag = TRANSPARENCY_INDEX_NONE;
+		private int transparencyFlag = TRANSPARENCY_INDEX_SET;
 
 		// The transparent color value in RRGGBB format.
 		// The highest order byte has no effect.
-		private int transparentColor = TRANSPARENCY_COLOR_NONE; // Default no transparent color
+		//private int transparentColor = TRANSPARENCY_COLOR_NONE; // Default no transparent color
+		private int transparentColor = 1; // Default no transparent color
 
 		public static final int DISPOSAL_UNSPECIFIED = 0;
 		public static final int DISPOSAL_LEAVE_AS_IS = 1;
@@ -1763,7 +1771,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 	}
 
 	@Override
-	public byte[] convert(Set<String> urls, ByteArrayOutputStream output, int delay, boolean loop) throws Exception {
+	public byte[] convert(String[] urls, ByteArrayOutputStream output, int delay, boolean loop) throws Exception {
 		Logger.debug("Use AnimatedGif Implementation");
 		try {
 			this.isApplyDither = loop;
@@ -1771,6 +1779,23 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 			for (String url : urls) {
 				Logger.info("images url {}", url);
 				BufferedImage next = ImageIO.read(new URL(url));
+				writeFrame(output, next, delay);
+			}
+			return output.toByteArray();
+		} finally {
+			finishWrite(output);
+		}
+
+	}
+	
+	public byte[] convertFile(String[] images, ByteArrayOutputStream output, int delay, boolean loop) throws Exception {
+		Logger.debug("Use AnimatedGif Implementation");
+		try {
+			this.isApplyDither = loop;
+			prepareForWrite(output, -1, -1);
+			for (String image : images) {
+				Logger.info("images url {}", image);
+				BufferedImage next = ImageIO.read(new File(image));
 				writeFrame(output, next, delay);
 			}
 			return output.toByteArray();

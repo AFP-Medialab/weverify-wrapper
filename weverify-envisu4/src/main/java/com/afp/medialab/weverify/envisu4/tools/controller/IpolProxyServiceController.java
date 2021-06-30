@@ -36,7 +36,9 @@ import com.afp.medialab.weverify.envisu4.tools.controller.exception.Envisu4Servi
 import com.afp.medialab.weverify.envisu4.tools.controller.exception.IpolProxyException;
 import com.afp.medialab.weverify.envisu4.tools.controller.exception.ServiceErrorCode;
 import com.afp.medialab.weverify.envisu4.tools.images.FileUtils;
+import com.afp.medialab.weverify.envisu4.tools.models.ErrorCode;
 import com.afp.medialab.weverify.envisu4.tools.models.IpolHomographicResponse;
+import com.afp.medialab.weverify.envisu4.tools.models.Results;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -191,14 +193,27 @@ public class IpolProxyServiceController {
 	 */
 	private IpolHomographicResponse buildResponse(ResponseEntity<IpolHomographicResponse> response) {
 		IpolHomographicResponse ipolResponse = response.getBody();
-		String output0 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_0.png";
-		String output1 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_1.png";
-		String pano = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/pano.jpg";
-		String stdout = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/stdout.txt";
-		ipolResponse.getResults().setOutput0(output0);
-		ipolResponse.getResults().setOutput1(output1);
-		ipolResponse.getResults().setPano(pano);
-		ipolResponse.getResults().setStdout(stdout);
+		if (ipolResponse.getStatus().equals("OK")) {
+			Results results = new Results();
+			ipolResponse.setResults(results);
+			String output0 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_0.png";
+			String output1 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_1.png";
+			String pano = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/pano.jpg";
+			String stdout = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/stdout.txt";
+			ipolResponse.getResults().setOutput0(output0);
+			ipolResponse.getResults().setOutput1(output1);
+			ipolResponse.getResults().setPano(pano);
+			ipolResponse.getResults().setStdout(stdout);
+		} else {
+			// Status is something else
+			String errorMessage = ipolResponse.getError();
+			if (errorMessage.startsWith("No matches"))
+				ipolResponse.setErrorCode(ErrorCode.NO_MATCHES_FOUND);
+			else {
+				ipolResponse.setErrorCode(ErrorCode.IPOL_GENERIC_ERROR);
+			}
+
+		}
 		return ipolResponse;
 	}
 

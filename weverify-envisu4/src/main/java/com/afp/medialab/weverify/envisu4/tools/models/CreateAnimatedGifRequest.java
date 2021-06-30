@@ -1,7 +1,5 @@
 package com.afp.medialab.weverify.envisu4.tools.models;
 
-import java.util.Set;
-
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
@@ -12,7 +10,7 @@ public class CreateAnimatedGifRequest {
 
 	@NotNull(message = "URLs are mandatory")
 	@Size(min = 2)
-	private Set<String> inputURLs;
+	private String[] inputURLs;
 	
 	
 	private int delay;
@@ -25,11 +23,11 @@ public class CreateAnimatedGifRequest {
 		this.delay = delay;
 	}
 
-	public Set<String> getInputURLs() {
+	public String[] getInputURLs() {
 		return inputURLs;
 	}
 
-	public void setInputURLs(Set<String> inputURLs) {
+	public void setInputURLs(String[] inputURLs) {
 		this.inputURLs = inputURLs;
 	}
 

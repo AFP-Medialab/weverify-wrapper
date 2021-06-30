@@ -17,10 +17,11 @@ public class IpolHomographicResponse {
 
 	private String error;
 
+	private ErrorCode errorCode;
+
 	private String[] messages;
-	
-	private Results results = new Results();
-	
+
+	private Results results;
 
 	public Results getResults() {
 		return results;
@@ -105,46 +106,13 @@ public class IpolHomographicResponse {
 	public void setAlgoInfo(AlgoInfo algoInfo) {
 		this.algoInfo = algoInfo;
 	}
-	
-	/**
-	 * @author bertrand
-	 *
-	 */
-	public class Results {
-		private String output0, output1, pano, stdout;
 
-		public String getOutput0() {
-			return output0;
-		}
+	public ErrorCode getErrorCode() {
+		return errorCode;
+	}
 
-		public void setOutput0(String output0) {
-			this.output0 = output0;
-		}
-
-		public String getOutput1() {
-			return output1;
-		}
-
-		public void setOutput1(String output1) {
-			this.output1 = output1;
-		}
-
-		public String getPano() {
-			return pano;
-		}
-
-		public void setPano(String pano) {
-			this.pano = pano;
-		}
-
-		public String getStdout() {
-			return stdout;
-		}
-
-		public void setStdout(String stdout) {
-			this.stdout = stdout;
-		}
-		
+	public void setErrorCode(ErrorCode errorCode) {
+		this.errorCode = errorCode;
 	}
 
 }

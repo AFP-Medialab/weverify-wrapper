@@ -1,5 +1,6 @@
 package com.afp.medialab.weverify.envisu4.tools.images;
 
+import java.awt.RenderingHints;
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
@@ -8,7 +9,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
@@ -45,9 +47,14 @@ public class AlphaGifWriter implements ICreateAnimatedGif {
 		// Image type
 		int imageType = images[0].getType();
 		// Zoom parameters
-		double sx = width == null ? 1.0 : ((double) width / images[0].getWidth());
-		double sy = height == null ? 1.0 : ((double) height / images[0].getHeight());
+		double sx = width == null ? 0.7 : ((double) width / images[0].getWidth());
+		double sy = height == null ? 0.7 : ((double) height / images[0].getHeight());
+		Map<RenderingHints.Key,Object> hints = new HashMap<>();
+        hints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        hints.put(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        hints.put(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		AffineTransformOp op = new AffineTransformOp(AffineTransform.getScaleInstance(sx, sy), null);
+		//RescaleOp op = new RescaleOp(1.0f, 1.0f, null);
 		try {
 			Gif gif = new Gif(outputStream, imageType, delay, loop);
 			for (BufferedImage image : images) {
@@ -115,6 +122,7 @@ public class AlphaGifWriter implements ICreateAnimatedGif {
 		private Gif(ImageOutputStream outputStream, int imageType, int delay, boolean loop) throws IOException {
 			this.writer = ImageIO.getImageWritersBySuffix("gif").next();
 			this.params = writer.getDefaultWriteParam();
+			this.params.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
 			this.metadata = writer.getDefaultImageMetadata(ImageTypeSpecifier.createFromBufferedImageType(imageType),
 					params);
 			// Configure metadata
@@ -133,6 +141,8 @@ public class AlphaGifWriter implements ICreateAnimatedGif {
 			graphicsControlExtensionNode.setAttribute("transparentColorFlag", "FALSE");
 			graphicsControlExtensionNode.setAttribute("delayTime", Integer.toString(delay / 10));
 			graphicsControlExtensionNode.setAttribute("transparentColorIndex", "0");
+			IIOMetadataNode commentsNode = getNode(root, "CommentExtensions");
+	        commentsNode.setAttribute("CommentExtension", "Created by Weverify");
 			IIOMetadataNode appExtensionsNode = getNode(root, "ApplicationExtensions");
 			IIOMetadataNode child = new IIOMetadataNode("ApplicationExtension");
 			child.setAttribute("applicationID", "NETSCAPE");
@@ -167,15 +177,15 @@ public class AlphaGifWriter implements ICreateAnimatedGif {
 	}
 
 	@Override
-	public byte[] convert(Set<String> urls, ByteArrayOutputStream output, int delay, boolean loop) throws Exception {
+	public byte[] convert(String[] urls, ByteArrayOutputStream output, int delay, boolean loop) throws Exception {
 		Logger.debug("alphaGifWriter");
-		BufferedImage[] images = new BufferedImage[urls.size()];
+		BufferedImage[] images = new BufferedImage[urls.length];
 		int index = 0;
 		for (String url : urls) {
 			images[index++] = ImageIO.read(new URL(url));
 		}
 		MemoryCacheImageOutputStream imageOutputStream = new MemoryCacheImageOutputStream(output);
-		convert(images, imageOutputStream, delay, loop, null, null);
+		convert(images, imageOutputStream, delay, loop);
 		return output.toByteArray();
 	}
 
