@@ -56,8 +56,8 @@ public class AnimatedGifController {
 	private ImageDbRepository imageDbRepository;
 
 	@Autowired
-	@Qualifier("alphagGifWriter")
-	//@Qualifier("animatedGifWriter")
+	//@Qualifier("alphagGifWriter")
+	@Qualifier("animatedGifWriter")
 	private ICreateAnimatedGif createAnimatedGif;
 
 	private static Logger Logger = LoggerFactory.getLogger(AnimatedGifController.class);
