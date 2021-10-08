@@ -1779,8 +1779,9 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 			for (String url : urls) {
 				Logger.info("images url {}", url);
 				BufferedImage next = ImageIO.read(new URL(url));
-				writeFrame(output, next, delay);
+				writeFrame(output, next, delay);				
 			}
+			output.write(IMAGE_TRAILER);
 			return output.toByteArray();
 		} finally {
 			finishWrite(output);

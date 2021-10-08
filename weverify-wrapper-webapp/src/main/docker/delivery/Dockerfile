@@ -1,7 +1,7 @@
 FROM twintplus:0.9 as base
 
 # install openjre:8
-RUN mkdir -p /usr/share/man/man1 && apt install openjdk-11-jre -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN mkdir -p /usr/share/man/man1 && apt-get update --allow-releaseinfo-change && apt install openjdk-11-jre -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 FROM base
 

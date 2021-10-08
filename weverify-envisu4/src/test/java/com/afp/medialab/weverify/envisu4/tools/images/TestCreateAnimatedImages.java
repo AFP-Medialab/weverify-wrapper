@@ -2,6 +2,8 @@ package com.afp.medialab.weverify.envisu4.tools.images;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -78,6 +80,42 @@ class TestCreateAnimatedImages {
 		ByteArrayOutputStream arrayOutputStream = new ByteArrayOutputStream();
 		byte[] content = animatedGIFWriter.convert(inputs, arrayOutputStream, 500, true);
 		FileUtils.writeByteArrayToFile(new File(output7), content);
+	}
+	//@Test
+	void testGenerateGif() {
+		 DataInputStream input = null;
+		 try {
+			 input = new DataInputStream(new FileInputStream(output7));
+			 while(true) {
+	                char num;
+	                try {
+	                    num = input.readChar();
+	                   // System.out.println("Reading from file: " + num);
+	                }
+	                catch (EOFException ex1) {
+	                	System.out.println("EOF");
+	                    break; //EOF reached.
+	                }
+	                catch (IOException ex2) {
+	                    System.err.println("An IOException was caught: " + ex2.getMessage());
+	                    ex2.printStackTrace();
+	                }
+			 }
+		 }
+		 catch (IOException ex) {
+	            System.err.println("An IOException was caught: " + ex.getMessage());
+	            ex.printStackTrace();
+	        }
+	        finally {
+	            try {
+	                // Close the input stream.
+	                input.close();
+	            }
+	            catch(IOException ex) {
+	                System.err.println("An IOException was caught: " + ex.getMessage());
+	                ex.printStackTrace();
+	            }
+	        }
 	}
 	
 }
