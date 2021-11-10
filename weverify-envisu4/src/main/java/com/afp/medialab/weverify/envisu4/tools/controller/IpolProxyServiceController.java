@@ -196,12 +196,16 @@ public class IpolProxyServiceController {
 		if (ipolResponse.getStatus().equals("OK")) {
 			Results results = new Results();
 			ipolResponse.setResults(results);
-			String output0 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_0.png";
-			String output1 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_1.png";
+			String output0 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_0.jpg";
+			String output1 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_1.jpg";
+			String png0 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_0.png";
+			String png1 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_1.png";
 			String pano = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/pano.jpg";
 			String stdout = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/stdout.txt";
 			ipolResponse.getResults().setOutput0(output0);
 			ipolResponse.getResults().setOutput1(output1);
+			ipolResponse.getResults().setPng0(png0);
+			ipolResponse.getResults().setPng1(png1);
 			ipolResponse.getResults().setPano(pano);
 			ipolResponse.getResults().setStdout(stdout);
 		} else {

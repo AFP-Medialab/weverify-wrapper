@@ -73,7 +73,7 @@ class TestCreateAnimatedImages {
 		return result;
 	}
 
-	@Test
+	//@Test
 	void testAnimatesGifWriter() throws Exception {
 		String inputs[] = new String[] { url1, url2 };
 		// Set<String> targetSet = new HashSet<String>(Arrays.asList(inputs));

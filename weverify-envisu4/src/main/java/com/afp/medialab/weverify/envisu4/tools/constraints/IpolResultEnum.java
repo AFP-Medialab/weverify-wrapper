@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum IpolResultEnum {
 
-	output_0("output_0.png"), output_1("output_1.png"), pano("pano.jpg"), stdout("stdout.txt");
+	output_0("output_0.jpg"), output_1("output_1.jpg"), png_0("output_0.png"), png_1("output_1.png"), pano("pano.jpg"), stdout("stdout.txt");
 
 	private String code;
 

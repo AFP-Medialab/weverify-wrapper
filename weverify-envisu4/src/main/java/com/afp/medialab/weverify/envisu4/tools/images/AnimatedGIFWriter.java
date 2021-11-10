@@ -20,6 +20,8 @@
 package com.afp.medialab.weverify.envisu4.tools.images;
 
 import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
@@ -37,6 +39,7 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
 /**
  *
  * Create Animated Gif. => Issue with image using alpha transparency.
@@ -101,6 +104,9 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 				logicalScreenWidth = image.getWidth();
 			if (image.getHeight() > logicalScreenHeight)
 				logicalScreenHeight = image.getHeight();
+		}
+		if (logicalScreenWidth > 600) {
+			System.out.println("trop gros");
 		}
 
 		return new Dimension(logicalScreenWidth, logicalScreenHeight);
@@ -578,11 +584,35 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 		writeFrame(os, frame, 100); // default delay is 100 milliseconds
 	}
 
+	private int ratio(int imageSize) {
+		System.out.println(imageSize);
+		int ratio = Math.floorDiv(60000, imageSize);
+		return ratio;
+	}
+
+	private BufferedImage resizeFrame(BufferedImage frame, int width, int height) {
+		Image tmp = frame.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+		BufferedImage dimg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+		Graphics2D g2d = dimg.createGraphics();
+		g2d.drawImage(tmp, 0, 0, null);
+		g2d.dispose();
+
+		return dimg;
+	}
+
 	public void writeFrame(OutputStream os, BufferedImage frame, int delay) throws Exception {
-		//#1
+		// #1
 		// Retrieve image dimension
 		int imageWidth = frame.getWidth();
 		int imageHeight = frame.getHeight();
+		// if image size up to 600 px resize with the ratio
+		if (imageWidth > 1000) {
+			int ratio = ratio(imageWidth);
+			imageWidth = Math.floorDiv(imageWidth * ratio, 100);
+			imageHeight = Math.floorDiv(imageHeight * ratio, 100);
+			frame = resizeFrame(frame, imageWidth, imageHeight);
+		}
 		// Determine the logical screen dimension
 		if (firstFrame) {
 			if (logicalScreenWidth <= 0)
@@ -601,7 +631,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 
 	private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition,
 			int delay, int disposalMethod, int userInputFlag, OutputStream os) throws Exception {
-		//#3
+		// #3
 		// Reset empty_bits
 		empty_bits = 0x08;
 
@@ -645,9 +675,9 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 			// Write the global colorPalette
 			writePalette(os, num_of_color);
 			writeComment(os, "Created by Weverify");
-			if (animated){// Write Netscape extension block
+			if (animated) {// Write Netscape extension block
 				writeNetscapeApplicationBlock(os, loopCount);
-				
+
 			}
 		}
 
@@ -670,7 +700,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 
 	private void writeFrame(int[] pixels, int imageWidth, int imageHeight, int imageLeftPosition, int imageTopPosition,
 			int delay, OutputStream os) throws Exception {
-		//#2
+		// #2
 		writeFrame(pixels, imageWidth, imageHeight, imageLeftPosition, imageTopPosition, delay,
 				GIFFrame.DISPOSAL_UNSPECIFIED, GIFFrame.USER_INPUT_NONE, os);
 	}
@@ -954,12 +984,13 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 		private int delay;
 		private int disposalMethod = DISPOSAL_UNSPECIFIED;
 		private int userInputFlag = USER_INPUT_NONE;
-		//private int transparencyFlag = TRANSPARENCY_INDEX_NONE;
+		// private int transparencyFlag = TRANSPARENCY_INDEX_NONE;
 		private int transparencyFlag = TRANSPARENCY_INDEX_SET;
 
 		// The transparent color value in RRGGBB format.
 		// The highest order byte has no effect.
-		//private int transparentColor = TRANSPARENCY_COLOR_NONE; // Default no transparent color
+		// private int transparentColor = TRANSPARENCY_COLOR_NONE; // Default no
+		// transparent color
 		private int transparentColor = 1; // Default no transparent color
 
 		public static final int DISPOSAL_UNSPECIFIED = 0;
@@ -1779,7 +1810,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 			for (String url : urls) {
 				Logger.info("images url {}", url);
 				BufferedImage next = ImageIO.read(new URL(url));
-				writeFrame(output, next, delay);				
+				writeFrame(output, next, delay);
 			}
 			output.write(IMAGE_TRAILER);
 			return output.toByteArray();
@@ -1788,7 +1819,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 		}
 
 	}
-	
+
 	public byte[] convertFile(String[] images, ByteArrayOutputStream output, int delay, boolean loop) throws Exception {
 		Logger.debug("Use AnimatedGif Implementation");
 		try {
