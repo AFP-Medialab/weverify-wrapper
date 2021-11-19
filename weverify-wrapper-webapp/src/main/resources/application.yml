@@ -29,7 +29,7 @@ application:
       msg: Service is Up
       
     twint:
-      command: docker run --rm --network dev_esnet -i twintplus:0.9
+      command: docker run --rm --network dev_esnet -i twintplus:0.11
       limit: 
         default: ${TWINT_LIMIT_DEFAULT:15000}
         min: ${TWINT_LIMIT_MIN:15000}
@@ -87,7 +87,7 @@ spring:
     hibernate.ddl-auto : none
     hibernate.use-new-id-generator-mappings : false
     generate-ddl: true
-    show-sql: true
+    show-sql: false
     properties:
       "[hibernate.physical_naming_strategy]": org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
       "[hibernate.implicit_naming_strategy]": org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl

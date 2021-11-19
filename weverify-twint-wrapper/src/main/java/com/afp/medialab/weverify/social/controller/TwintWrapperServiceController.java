@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,22 +55,16 @@ public class TwintWrapperServiceController {
 	@Value("${application.twint-wrapper.home.msg}")
 	private String homeMsg;
 
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(path = "/", method = RequestMethod.GET)
 	public @ResponseBody String home() {
 		return homeMsg;
 	}
 
 	@Operation(summary = "Trigger a Twitter Scraping")
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(path = "/collect", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody CollectResponse collect(@RequestBody @Valid CollectRequest collectRequest,
-			BindingResult result) {
-
-		if (!collectRequest.isValid())
-			return new CollectResponse(null, Status.Error,
-					"and_list or user_list must be given, from and until are mandatory", null);
-
+			BindingResult result, @AuthenticationPrincipal Jwt principal) {
+		Logger.info("POST /collect - user_id: {} ", principal.getClaimAsString("sub") );
 		Logger.debug(result.getAllErrors().toString());
 		if (result.hasErrors()) {
 			String str = "";
@@ -78,29 +74,31 @@ public class TwintWrapperServiceController {
 			Logger.info(str);
 			return new CollectResponse(null, Status.Error, str, null);
 		}
+		if (!collectRequest.isValid())
+			return new CollectResponse(null, Status.Error,
+					"from must be before until", null);
 
 		Set<String> and_list = collectRequest.getKeywordList();
 		Set<String> not_ist = collectRequest.getBannedWords();
 		if (and_list != null)
-			Logger.debug("and_list : " + and_list.toString());
+			Logger.info("and_list : " + and_list.toString());
 		if (not_ist != null)
-			Logger.debug("not_list : " + not_ist.toString());
+			Logger.info("not_list : " + not_ist.toString());
 		if (!collectRequest.isDisableTimeRange()) {
-			Logger.debug("from : {}", collectRequest.getFrom().toString());
-			Logger.debug("until : {}", collectRequest.getUntil().toString());
+			Logger.info("from : {}", collectRequest.getFrom().toString());
+			Logger.info("until : {}", collectRequest.getUntil().toString());
 		}
-		Logger.debug("language : " + collectRequest.getLang());
-		Logger.debug("user : " + collectRequest.getUserList());
-		Logger.debug("verified : " + collectRequest.isVerified());
-		Logger.debug("Retweets : " + collectRequest.getRetweetsHandling());
-		Logger.debug("Media : " + collectRequest.getMedia());
-		Logger.debug("disableTimeRange : " + collectRequest.isDisableTimeRange());
+		Logger.info("language : {}", collectRequest.getLang());
+		Logger.info("user : {}", collectRequest.getUserList());
+		Logger.info("verified : {}", collectRequest.isVerified());
+		Logger.info("Retweets : {}", collectRequest.getRetweetsHandling());
+		Logger.info("Media : {}", collectRequest.getMedia());
+		Logger.info("disableTimeRange {}", collectRequest.isDisableTimeRange());
 
 		return requestService.useCache(collectRequest);
 	}
 
 	@Operation(summary = "Trigger a status check")
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(path = "/status", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody StatusResponse status(@RequestBody StatusRequest statusRequest) {
 		Logger.debug("POST status " + statusRequest.getSession());
@@ -108,7 +106,6 @@ public class TwintWrapperServiceController {
 	}
 
 	@Operation(summary = "Trigger a status check")
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(path = "/status/{id}", method = RequestMethod.GET)
 	public @ResponseBody StatusResponse status(@PathVariable("id") String id) {
 		Logger.debug("GET status " + id);
@@ -116,16 +113,17 @@ public class TwintWrapperServiceController {
 	}
 
 
-	@PreAuthorize("isAuthenticated()")
+	@PreAuthorize("hasAuthority('WEVERIFY_MNG')")
 	@RequestMapping(value = "/collect-history", method = RequestMethod.GET)
 	public @ResponseBody HistoryResponse collectHistory(
 			@RequestParam(value = "limit", required = false, defaultValue = "5") int limit,
 			@RequestParam(value = "asc", required = false, defaultValue = "false") boolean asc,
 			@RequestParam(value = "desc", required = false, defaultValue = "false") boolean desc,
-			@RequestParam(value = "status", required = false) String status) {
+			@RequestParam(value = "status", required = false) String status, 
+			@AuthenticationPrincipal Jwt principal) {
 		List<CollectHistory> last;
 
-		Logger.info("GET collect-history :  " + status);
+		Logger.info("GET /collect-history - user_id {}", principal.getClaimAsString("sub"));
 
 		if (status == null) {
 			if (!asc && !desc)
@@ -146,11 +144,12 @@ public class TwintWrapperServiceController {
 		return new HistoryResponse(last);
 	}
 
-	@Operation(summary = "Get the requests history")
-	@PreAuthorize("isAuthenticated()")
+
+	@PreAuthorize("hasAuthority('WEVERIFY_MNG')")
 	@RequestMapping(path = "/collect-history", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody HistoryResponse status(@RequestBody @Valid HistoryRequest historyRequest) {
-		Logger.info("POST collect-history : " + historyRequest.toString());
+	public @ResponseBody HistoryResponse status(@RequestBody @Valid HistoryRequest historyRequest, @AuthenticationPrincipal Jwt principal) {
+		Logger.info("POST /collect-history - user_id {}",principal.getClaimAsString("sub"));
+		Logger.info("/collect history request: {}", historyRequest.toString());
 		List<CollectHistory> collectHistoryList = collectService.getHistory(historyRequest.getLimit(),
 				historyRequest.getStatus(),
 				(historyRequest.getSort() == null ? false : historyRequest.getSort().equals("desc")),
@@ -159,7 +158,6 @@ public class TwintWrapperServiceController {
 	}
 
 	@Operation(summary = "Update an old request")
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(path = "/collect-update/{id}", method = RequestMethod.GET)
 	public @ResponseBody StatusResponse collectUpdate(@PathVariable("id") String id)
 			throws ExecutionException, InterruptedException, IOException {
@@ -167,7 +165,6 @@ public class TwintWrapperServiceController {
 	}
 
 	@Operation(summary = "Update an old request")
-	@PreAuthorize("isAuthenticated()")
 	@RequestMapping(path = "/collect-update", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody StatusResponse collectUpdate(@RequestBody @Valid CollectUpdateRequest collectUpdateRequest)
 			throws ExecutionException, InterruptedException, IOException {

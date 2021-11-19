@@ -22,6 +22,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
@@ -56,7 +59,7 @@ public class AnimatedGifController {
 	private ImageDbRepository imageDbRepository;
 
 	@Autowired
-	//@Qualifier("alphagGifWriter")
+	// @Qualifier("alphagGifWriter")
 	@Qualifier("animatedGifWriter")
 	private ICreateAnimatedGif createAnimatedGif;
 
@@ -66,8 +69,9 @@ public class AnimatedGifController {
 	@RequestMapping(path = {
 			"/animated" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.IMAGE_GIF_VALUE)
 	public ResponseEntity<Resource> createAnimatedGifForURL(
-			@RequestBody @Valid CreateAnimatedGifRequest createAnimatedGifRequest) throws Exception {
-
+			@RequestBody @Valid CreateAnimatedGifRequest createAnimatedGifRequest,
+			@AuthenticationPrincipal Jwt principal) throws Exception {
+		Logger.info("POST /animated - userId: {}", principal.getClaimAsString("sub"));
 		String[] urls = createAnimatedGifRequest.getInputURLs();
 		int delay = createAnimatedGifRequest.getDelay();
 
@@ -81,7 +85,7 @@ public class AnimatedGifController {
 				image.setContent(content);
 				image.setMd5sum(md5sum);
 				image.setCreationDate(Calendar.getInstance().getTime());
-				imageDbRepository.save(image);
+				imageDbRepository.save(image); 
 			}
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
 			headers.add("imageId", md5sum);
@@ -91,7 +95,7 @@ public class AnimatedGifController {
 			// return new ByteArrayResource(content);
 
 		} catch (IIOException e) {
-			Logger.error("IIOException", e);
+			Logger.error("Failed loading resource", e);
 			throw new AnimatedGifCreationException(ServiceErrorCode.ANIMATED_GIF_URL_LOAD_FAILED,
 					"Fail loading input resource");
 		} catch (Exception e) {
@@ -106,21 +110,22 @@ public class AnimatedGifController {
 
 	@Operation(summary = "get stored animated Gif", description = "Get animated Gif generated from database")
 	@RequestMapping(path = { "/animated/{imageId}" }, method = RequestMethod.GET, produces = MediaType.IMAGE_GIF_VALUE)
-	public Resource getImageFromId(@PathVariable String imageId) {
+	public Resource getImageFromId(@PathVariable String imageId, @AuthenticationPrincipal Jwt principal) {
+		Logger.info("GET /animated/{} - user_id: {}", imageId, principal.getClaimAsString("sub"));
 		byte[] content = imageDbRepository.findByMd5sum(imageId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)).getContent();
 		return new ByteArrayResource(content);
 
 	}
 
-	@Operation(summary = "get create animated gif history")
-	@RequestMapping(path = {
-			"/animated/history" }, method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-	public CreateAnimatedGifHistory getCreateImageHistory(
-			@RequestParam(value = "limit", required = false, defaultValue = "5") int limit) {
+	@PreAuthorize("hasAuthority('WEVERIFY_MNG')")
+	@RequestMapping(value = "/animated/history", params = "limit", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	public CreateAnimatedGifHistory getCreateImageHistory(@RequestParam(defaultValue = "5") int limit,
+			@AuthenticationPrincipal Jwt principal) {
+		Logger.info("GET /animated/history - user_id: {}", principal.getClaimAsString("sub"));
 		Pageable limitQuery = PageRequest.of(0, limit);
 		Page<Image> images = imageDbRepository.findAll(limitQuery);
-		// List<Image> images = imageDbRepository.findAll(limitQuery);
+
 		List<AnimatedGif> animatedGifs = new LinkedList<AnimatedGif>();
 		for (Image image : images) {
 			AnimatedGif animatedGif = new AnimatedGif(image.getMd5sum(), image.getCreationDate());

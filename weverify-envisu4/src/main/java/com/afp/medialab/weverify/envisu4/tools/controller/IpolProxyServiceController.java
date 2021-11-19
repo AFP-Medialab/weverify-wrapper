@@ -18,6 +18,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
@@ -87,7 +89,8 @@ public class IpolProxyServiceController {
 	@RequestMapping(path = {
 			"/ipol/homographic" }, method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<IpolHomographicResponse> homographicProcessCall(@RequestParam("file_0") MultipartFile file_0,
-			@RequestParam("file_1") MultipartFile file_1) {
+			@RequestParam("file_1") MultipartFile file_1, @AuthenticationPrincipal Jwt principal) {
+		Logger.info("POST /ipol/homographic - user_id: {}", principal.getClaimAsString("sub"));
 		FileSystemResource fileSysRs0 = new FileSystemResource(fileUtils.convert(file_0));
 		FileSystemResource fileSysRs1 = new FileSystemResource(fileUtils.convert(file_1));
 		return callAndBuildIpolService(fileSysRs0, fileSysRs1);
@@ -106,7 +109,10 @@ public class IpolProxyServiceController {
 	@RequestMapping(path = {
 			"/ipol/homographic/url" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<IpolHomographicResponse> homographicProcessCall(@RequestParam("url_0") String url_0,
-			@RequestParam("url_1") String url_1) throws IpolProxyException {
+			@RequestParam("url_1") String url_1, @AuthenticationPrincipal Jwt principal) throws IpolProxyException {
+		Logger.info("POST /ipol/homographic/url - user_id: {}", principal.getClaimAsString("sub"));
+		Logger.info("fake image: {}", url_0);
+		Logger.info("original image {}", url_1);
 		try {
 			URL url0 = new URL(url_0);
 			URL url1 = new URL(url_1);
@@ -127,8 +133,7 @@ public class IpolProxyServiceController {
 			MediaType.IMAGE_PNG_VALUE, MediaType.IMAGE_JPEG_VALUE, MediaType.TEXT_PLAIN_VALUE })
 	public ResponseEntity<Resource> downloadHomographicResults(@PathVariable String key,
 			@PathVariable IpolResultEnum image) throws IpolProxyException {
-		Logger.debug("key {}", key);
-		Logger.debug("image {}", image);
+		Logger.info("GET /ipol/homographic/result/{}/{}", key, image.getCode());
 		try {
 			ResponseEntity<Resource> response = restTemplate
 					.getForEntity(ipolEndpoint + this.resultEndpoint + key + "/" + image.getCode(), Resource.class);
@@ -136,12 +141,14 @@ public class IpolProxyServiceController {
 		} catch (HttpClientErrorException e) {
 
 			switch (e.getRawStatusCode()) {
-			case 404: {
+			case 404:
+				Logger.error("resource not found found in IPOL Server: {}/{}", key, image.getCode());
 				throw new IpolProxyException(ServiceErrorCode.IPOL_RESOURCE_NOT_FOUND,
 						"Not resource found in IPOL Server with key " + key);
-			}
 			default:
+				Logger.error("Error contacting IPOL service", e);
 				throw new IpolProxyException(ServiceErrorCode.IPOL_REMOTE_SERVICE_ERROR, e.getMessage());
+
 			}
 
 		}
@@ -160,7 +167,7 @@ public class IpolProxyServiceController {
 	}
 
 	/**
-	 * Call ipol service with tempory images
+	 * Call ipol service with temporary images
 	 * 
 	 * @param fileSysRs0
 	 * @param fileSysRs1

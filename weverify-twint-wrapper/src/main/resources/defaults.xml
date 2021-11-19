@@ -21,6 +21,7 @@
 	<logger name="org.apache.catalina.util.LifecycleBase" level="ERROR" />
 	<logger name="org.apache.coyote.http11.Http11NioProtocol" level="WARN" />
 	<logger name="org.apache.sshd.common.util.SecurityUtils" level="WARN" />
+	<logger name="nl.basjes.parse.useragent" level="WARN" />
 	<logger name="org.apache.tomcat.util.net.NioSelectorPool" level="WARN" />
 	<logger name="org.crsh.plugin" level="WARN" />
 	<logger name="org.crsh.ssh" level="WARN" />
