@@ -18,14 +18,7 @@ pipeline {
             }
         }
     
-        stage ('Build Java application') {
-                          
-                   steps{
-      
-      
-                   }
        
-         }
 
     }
 }
