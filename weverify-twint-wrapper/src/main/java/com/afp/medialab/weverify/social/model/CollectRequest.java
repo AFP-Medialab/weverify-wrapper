@@ -4,8 +4,7 @@ import java.util.Date;
 import java.util.Set;
 import java.util.SortedSet;
 
-import javax.validation.constraints.NotNull;
-
+import com.afp.medialab.weverify.social.constrains.CollectConstraint;
 import com.afp.medialab.weverify.social.constrains.LangConstrain;
 import com.afp.medialab.weverify.social.constrains.MediaConstrain;
 import com.afp.medialab.weverify.social.constrains.RetweetHandlingConstrain;
@@ -16,15 +15,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-
+@CollectConstraint
 public class CollectRequest {
 
-	@NotNull(message = "keywords are mandatory")
+	//@NotNull(message = "keywords are mandatory")
 	@JsonDeserialize(using = SetStringNormalizerDeserializer.class)
 	private Set<String> keywordList;
 	@JsonDeserialize(using = SetStringNormalizerDeserializer.class)
 	private Set<String> bannedWords;
-
+	@JsonDeserialize(using = SetStringNormalizerDeserializer.class)
+	private Set<String> keywordAnyList;
 	@LangConstrain
 	private String lang;
 	@JsonDeserialize(using = SetStringNormalizerDeserializer.class)
@@ -55,6 +55,7 @@ public class CollectRequest {
 
 	public CollectRequest(CollectRequest collectRequest) {
 		this.keywordList = collectRequest.keywordList;
+		this.keywordAnyList = collectRequest.keywordAnyList;
 		this.bannedWords = collectRequest.bannedWords;
 		this.lang = collectRequest.lang;
 		this.userList = collectRequest.userList;
@@ -69,6 +70,7 @@ public class CollectRequest {
 
 	public CollectRequest(Request request) {
 		this.keywordList = request.getKeywordList();
+		this.keywordAnyList = request.getKeywordAnyList();
 		this.bannedWords = request.getBannedWords();
 		this.lang = request.getLanguage();
 		this.userList = request.getUserList();
@@ -85,6 +87,14 @@ public class CollectRequest {
 
 	public void setKeywordList(SortedSet<String> keywordList) {
 		this.keywordList = keywordList;
+	}
+
+	public Set<String> getKeywordAnyList() {
+		return keywordAnyList;
+	}
+
+	public void setKeywordAnyList(SortedSet<String> keywordAnyList) {
+		this.keywordAnyList = keywordAnyList;
 	}
 
 	public Set<String> getBannedWords() {
@@ -183,11 +193,16 @@ public class CollectRequest {
 
 		Set<String> notSet1 = this.bannedWords;
 		Set<String> notSet2 = overRequest.bannedWords;
+		
+		Set<String> orSet1 = this.keywordAnyList;
+		Set<String> orSet2 = overRequest.keywordAnyList;
 
 		if (!equalsSet(andSet1, andSet2))
 			sameSearch = false;
 
 		if (!equalsSet(notSet1, notSet2))
+			sameSearch = false;
+		if (!equalsSet(orSet1, orSet2))
 			sameSearch = false;
 
 		Boolean sameLang;
@@ -201,11 +216,9 @@ public class CollectRequest {
 		return sameSearch && sameLang;
 	}
 
-	public boolean isValid() {
-		if (this.keywordList == null && userList.size() == 0)
-			return false;
-		if (this.keywordList != null && this.keywordList.size() == 0 && userList.size() == 0)
-			return false;
+	
+	
+	public boolean isValid() {		
 		if (!this.disableTimeRange && (this.from == null || this.until == null))
 			return false;
 		if(!this.disableTimeRange && (from.after(until)))

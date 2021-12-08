@@ -35,7 +35,7 @@ import com.afp.medialab.weverify.social.twint.TwintThreadGroup;
 public class RequestCacheManager {
 
 	private static Logger Logger = LoggerFactory.getLogger(RequestCacheManager.class);
-	
+
 	@Autowired
 	private CollectService collectService;
 
@@ -44,7 +44,7 @@ public class RequestCacheManager {
 
 	@Autowired
 	private TwintThreadGroup ttg;
-	
+
 	@Autowired
 	private UserPropertiesManager userPropertiesManager;
 
@@ -67,9 +67,9 @@ public class RequestCacheManager {
 		Set<Request> similarRequests = similarInCache(collectRequest);
 		Set<Request> previousMatch = exactRequests(similarRequests, collectRequest);
 		boolean isAllowOverride = userPropertiesManager.isAllowOverrideCache();
-		
-		if(!isAllowOverride && !collectRequest.isCached()) {
-			//user is not allow to override the cache => cache is set to true
+
+		if (!isAllowOverride && !collectRequest.isCached()) {
+			// user is not allow to override the cache => cache is set to true
 			collectRequest.setCached(true);
 		}
 		if ((previousMatch != null && !previousMatch.isEmpty()) && collectRequest.isCached()) {
@@ -151,6 +151,7 @@ public class RequestCacheManager {
 			return filterRequest;
 
 		final Set<String> keywords;
+		final Set<String> keywordsAny;
 		final Set<String> userList;
 		final Set<String> banneWords;
 		final String lang;
@@ -159,6 +160,12 @@ public class RequestCacheManager {
 			collectRequest.setKeywordList((SortedSet<String>) keywords);
 		} else {
 			keywords = collectRequest.getKeywordList();
+		}
+		if (collectRequest.getKeywordAnyList() == null) {
+			keywordsAny = new TreeSet<String>();
+			collectRequest.setKeywordAnyList((SortedSet<String>) keywordsAny);
+		} else {
+			keywordsAny = collectRequest.getKeywordAnyList();
 		}
 		if (collectRequest.getUserList() == null) {
 			userList = new TreeSet<String>();
@@ -179,6 +186,7 @@ public class RequestCacheManager {
 		}
 
 		filterRequest.addAll(request.stream().filter(e -> e.getKeywordList().stream().allMatch(keywords::contains))
+				.filter(e -> e.getKeywordAnyList().stream().allMatch(keywordsAny::contains))
 				.filter(e -> e.getUserList().stream().allMatch(userList::contains))
 				.filter(e -> e.getBannedWords().stream().allMatch(banneWords::contains))
 				.filter(e -> e.getVerified().equals(collectRequest.isVerified())).collect(Collectors.toSet()));
@@ -205,8 +213,9 @@ public class RequestCacheManager {
 	 * @return
 	 */
 	private Set<Request> similarInCache(CollectRequest collectRequest) {
-		Set<Request> requestSameKeyWords = collectService.requestContainsKeyWords(collectRequest.getKeywordList());
-		Set<Request> machingRequests = mergeCriteria(requestSameKeyWords);
+		Set<Request> mergeRequest = collectService.requestConstainsCriterias(collectRequest.getKeywordList(),
+				collectRequest.getKeywordAnyList(), collectRequest.getBannedWords(), collectRequest.getUserList());
+		Set<Request> machingRequests = mergeCriteria(mergeRequest);
 		if (!collectRequest.isDisableTimeRange())
 			machingRequests = rangeDeltaToProcess.requestfromDateRange(machingRequests, collectRequest);
 		return machingRequests;
@@ -251,7 +260,7 @@ public class RequestCacheManager {
 
 		List<DateRange> rangesToProcess = rangeDeltaToProcess.rangeToProcess(existingDateRanges, requestDateRange);
 		List<CollectRequest> requestsToPerform = new LinkedList<CollectRequest>();
-		// This is a new reques
+		// This is a new request
 		if (!rangesToProcess.isEmpty()) {
 			Logger.info("Process twint ranges : " + rangesToProcess.size());
 			for (DateRange range : rangesToProcess) {
@@ -308,7 +317,7 @@ public class RequestCacheManager {
 		int scrappingLimit = userPropertiesManager.getLimitFromUserRole();
 		ttg.callTwintMultiThreaded(collectHistory, collectRequest, scrappingLimit);
 	}
-	
+
 	/**
 	 * @param session
 	 * @return Status response or the corresponding session
@@ -338,9 +347,10 @@ public class RequestCacheManager {
 
 		return getStatusResponse(session);
 	}
-	
+
 	/**
 	 * Update existing request
+	 * 
 	 * @param collectHistory
 	 */
 	private void callTwint(CollectHistory collectHistory) {
@@ -353,7 +363,7 @@ public class RequestCacheManager {
 		}
 
 	}
-	
+
 	/**
 	 * @param session we want the status from.
 	 * @return StatusResponse of the session.

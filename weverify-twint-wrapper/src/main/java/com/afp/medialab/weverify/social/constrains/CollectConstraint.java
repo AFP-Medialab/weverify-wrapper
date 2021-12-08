@@ -13,7 +13,7 @@ import javax.validation.Payload;
 @Constraint(validatedBy = CollectConstraintValidator.class)
 public @interface CollectConstraint {
 	
-	String message() default "KeywordList or userList values are mandatory";
+	String message() default "KeywordList, KeywordAnyList or userList values are mandatory";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }

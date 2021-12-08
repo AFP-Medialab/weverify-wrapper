@@ -14,9 +14,12 @@ public class CollectConstraintValidator implements ConstraintValidator<CollectCo
 
 	@Override
 	public boolean isValid(CollectRequest collectRequest, ConstraintValidatorContext context) {
-		if ((collectRequest.getKeywordList() == null) && collectRequest.getUserList() == null)
+		if ((collectRequest.getKeywordList() == null) && collectRequest.getUserList() == null
+				&& collectRequest.getKeywordAnyList() == null)
 			return false;
-		else if (collectRequest.getKeywordList() != null && collectRequest.getKeywordList().isEmpty() && collectRequest.getUserList() != null && collectRequest.getUserList().isEmpty())
+		else if (collectRequest.getKeywordList() != null && collectRequest.getKeywordList().isEmpty()
+				&& collectRequest.getUserList() != null && collectRequest.getUserList().isEmpty()
+				&& collectRequest.getKeywordAnyList() != null && collectRequest.getKeywordAnyList().isEmpty())
 			return false;
 		else
 			return true;

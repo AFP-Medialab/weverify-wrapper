@@ -283,25 +283,53 @@ public class CollectService {
 		return matching_users;
 	}
 
-	
 	// New simplified methods
 
-	public Set<Request> requestContainsKeyWords(Set<String> keywords) {
-		if (keywords == null || keywords.size() == 0)
-			return null;
-		return requestInterface.findByKeywordListInAndMergeIsFalse(keywords);
-	}
-
-	public Set<Request> requestContainsBannedKeyWords(Set<String> bannedWords) {
-		if (bannedWords == null || bannedWords.size() == 0)
-			return null;
-		return requestInterface.findByBannedWordsInAndMergeIsFalse(bannedWords);
-	}
-
-	public Set<Request> requestContainsUserList(Set<String> userList) {
-		if (userList == null || userList.size() == 0)
-			return null;
-		return requestInterface.findByUserListInAndMergeIsFalse(userList);
+	public Set<Request> requestConstainsCriterias(Set<String> keywords, Set<String> keywordsAny,
+			Set<String> bannedWords, Set<String> userList) {
+		if ((keywords == null || keywords.size() == 0) && keywordsAny != null && bannedWords != null
+				&& (userList != null && userList.size() > 0))
+			return requestInterface.findByKeywordAnyListInAndBannedWordsInAndUserListIn(keywordsAny, bannedWords,
+					userList);
+		else if ((keywordsAny == null || keywordsAny.size() == 0) && keywords != null && bannedWords != null
+				&& (userList != null && userList.size() > 0))
+			return requestInterface.findByKeywordListInAndBannedWordsInAndUserListInAndMergeFalse(keywords, bannedWords, userList);
+		else if ((bannedWords == null || bannedWords.size() == 0) && keywords != null && keywordsAny != null
+				&& (userList != null && userList.size() > 0))
+			return requestInterface.findByKeywordListInAndKeywordAnyListInAndUserListInAndMergeFalse(keywords, keywordsAny,
+					userList);
+		else if ((userList == null || userList.size() == 0) && keywords != null && keywordsAny != null
+				&& bannedWords != null)
+			return requestInterface.findByKeywordListInAndKeywordAnyListInAndBannedWordsInAndMergeFalse(keywords, keywordsAny,
+					bannedWords);
+		else if ((keywords == null || keywords.size() == 0) && (keywordsAny == null || keywordsAny.size() == 0))
+			return requestInterface.findByUserListInAndBannedWordsInAndMergeFalse(userList, bannedWords);
+		else if ((keywords == null || keywords.size() == 0) && (bannedWords == null || bannedWords.size() == 0)
+				&& keywordsAny != null && (userList != null && userList.size() > 0))
+			return requestInterface.findByKeywordAnyListInAndUserListInAndMergeFalse(keywordsAny, userList);
+		else if ((keywords == null || keywords.size() == 0) && (userList == null || userList.size() == 0)
+				&& keywordsAny != null && bannedWords != null)
+			return requestInterface.findByKeywordAnyListInAndBannedWordsInAndMergeFalse(keywordsAny, bannedWords);
+		else if ((keywordsAny == null || keywordsAny.size() == 0) && (bannedWords == null || bannedWords.size() == 0)
+				&& keywords != null && (userList != null && userList.size() > 0))
+			return requestInterface.findByKeywordListInAndUserListInAndMergeFalse(keywords, userList);
+		else if ((keywordsAny == null || keywordsAny.size() == 0) && (userList == null || userList.size() == 0)
+				&& keywords != null && bannedWords != null)
+			return requestInterface.findByKeywordAnyListInAndBannedWordsInAndMergeFalse(keywords, bannedWords);
+		else if ((userList == null || userList.size() == 0) && (bannedWords == null || bannedWords.size() == 0)
+				&& keywords != null && keywordsAny != null)
+			return requestInterface.findByKeywordListInAndKeywordAnyListInAndMergeFalse(keywords, keywordsAny);
+		else if ((keywords == null || keywords.size() == 0) && (keywordsAny == null || keywordsAny.size() == 0)
+				&& (bannedWords == null || bannedWords.size() == 0) && (userList != null && userList.size() > 0))
+			return requestInterface.findByUserListInAndMergeFalse(userList);
+		else if ((keywords == null || keywords.size() == 0) && (userList == null || userList.size() == 0)
+				&& (bannedWords == null || bannedWords.size() == 0) && keywordsAny != null)
+			return requestInterface.findByKeywordAnyListInAndMergeFalse(keywordsAny);
+		else if ((keywordsAny == null || keywordsAny.size() == 0) && (userList == null || userList.size() == 0)
+				&& (bannedWords == null || bannedWords.size() == 0) && keywords != null)
+			return requestInterface.findByKeywordListInAndMergeFalse(keywords);
+		return requestInterface.findByKeywordListInAndKeywordAnyListInAndBannedWordsInAndUserListInAndMergeFalse(keywords,
+				keywordsAny, bannedWords, userList);
 	}
 
 	/**

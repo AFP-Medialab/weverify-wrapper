@@ -2,6 +2,7 @@ package com.afp.medialab.weverify.social.dao.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Set;
 import java.util.SortedSet;
 
@@ -33,6 +34,10 @@ public class Request implements Serializable {
 	@Column(name = "keywordList", nullable = true, updatable = true)
 	@ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
 	private Set<String> keywordList;
+
+	@Column(name = "keywordAnyList", nullable = true, updatable = true)
+	@ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+	private Set<String> keywordAnyList;
 
 	@Column(name = "bannedWords", nullable = true, updatable = true)
 	@ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
@@ -70,9 +75,10 @@ public class Request implements Serializable {
 	public Request() {
 	}
 
-	public Request(Set<String> keywordList, Set<String> bannedWords, String language, Set<String> userList, Date since,
-			Date until, String media) {
+	public Request(Set<String> keywordList, Set<String> keywordAnyList, Set<String> bannedWords, String language,
+			Set<String> userList, Date since, Date until, String media) {
 		this.keywordList = keywordList;
+		this.keywordAnyList = keywordAnyList;
 		this.bannedWords = bannedWords;
 		this.language = language;
 		this.userList = userList;
@@ -82,13 +88,14 @@ public class Request implements Serializable {
 	}
 
 	public Request(CollectRequest collectRequest) {
-		this(collectRequest.getKeywordList(), collectRequest.getBannedWords(), collectRequest.getLang(),
-				collectRequest.getUserList(), collectRequest.getFrom(), collectRequest.getUntil(),
-				collectRequest.getMedia());
+		this(collectRequest.getKeywordList(), collectRequest.getKeywordAnyList(), collectRequest.getBannedWords(),
+				collectRequest.getLang(), collectRequest.getUserList(), collectRequest.getFrom(),
+				collectRequest.getUntil(), collectRequest.getMedia());
 	}
 
 	public void update(CollectRequest collectRequest) {
 		this.keywordList = collectRequest.getKeywordList();
+		this.keywordAnyList = collectRequest.getKeywordAnyList();
 		this.bannedWords = collectRequest.getBannedWords();
 		this.language = collectRequest.getLang();
 		this.userList = collectRequest.getUserList();
@@ -112,6 +119,14 @@ public class Request implements Serializable {
 
 	public void setKeywordList(SortedSet<String> keywordList) {
 		this.keywordList = keywordList;
+	}
+
+	public Set<String> getKeywordAnyList() {
+		return keywordAnyList;
+	}
+
+	public void setKeywordAndList(SortedSet<String> keywordAnyList) {
+		this.keywordAnyList = keywordAnyList;
 	}
 
 	public Set<String> getBannedWords() {
@@ -192,6 +207,30 @@ public class Request implements Serializable {
 
 	public void setMerge(Boolean merge) {
 		this.merge = merge;
+	}
+
+	@Override
+	public int hashCode() {
+		int hash = Objects.hash(bannedWords, keywordAnyList, keywordList, language, media, merge, retweetsHandling, since,
+				until, userList, verified);
+		return hash;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Request other = (Request) obj;
+		return Objects.equals(bannedWords, other.bannedWords) && Objects.equals(keywordAnyList, other.keywordAnyList)
+				&& Objects.equals(keywordList, other.keywordList) && Objects.equals(language, other.language)
+				&& Objects.equals(media, other.media) && Objects.equals(merge, other.merge)
+				&& Objects.equals(retweetsHandling, other.retweetsHandling) && Objects.equals(since, other.since)
+				&& Objects.equals(until, other.until) && Objects.equals(userList, other.userList)
+				&& Objects.equals(verified, other.verified);
 	}
 
 }

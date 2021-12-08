@@ -61,12 +61,24 @@ public class TwintPlusRequestBuilder {
 			return null;
 		StringBuilder sb = new StringBuilder();
 
-		if (collectRequest.getKeywordList() != null) {
+		if (collectRequest.getKeywordList() != null && !collectRequest.getKeywordList().isEmpty()) {
 			ArrayList<String> and = new ArrayList<String>(collectRequest.getKeywordList());
 			sb.append(and.get(0));
 			for (int i = 1; i < and.size(); i++) {
 				sb.append(" " + and.get(i));
 			}
+		}
+		
+		if (collectRequest.getKeywordAnyList() != null && !collectRequest.getKeywordAnyList().isEmpty()) {
+			ArrayList<String> or = new ArrayList<String>(collectRequest.getKeywordAnyList());
+			if(sb.length() > 0)
+				sb.append(" ("+or.get(0));
+			else 
+				sb.append("("+or.get(0));
+			for (int i = 1; i < or.size(); i++) {
+				sb.append(" OR " + or.get(i));
+			}
+			sb.append(")");
 		}
 
 		if (collectRequest.getBannedWords() != null)
