@@ -1,4 +1,4 @@
-FROM twintplus:0.9 as base
+FROM registry-medialab.afp.com/twintplus:0.12 as base
 
 # install openjre:8
 RUN mkdir -p /usr/share/man/man1 && apt update && apt install openjdk-11-jre -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
