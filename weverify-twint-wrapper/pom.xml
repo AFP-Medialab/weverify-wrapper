@@ -15,7 +15,7 @@
 	<repositories>
 		<repository>
 			<id>Gate-Repository</id>
-			<url>http://repo.gate.ac.uk/content/groups/public</url>
+			<url>https://repo.gate.ac.uk/content/groups/public</url>
 		</repository>
 	</repositories>
 	<dependencies>
