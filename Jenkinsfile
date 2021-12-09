@@ -20,8 +20,9 @@ pipeline {
 	        	script {
 	                def version = sh script: '${M2_HOME}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
 	                println "version ${version}"
-	                dockerImage = "registry-medialab.afp.com/weverify-wrapper:${version}"    
-	                buidImage = docker.build('${dockerImage}','./docker/delivery')           	                          
+	                def dockerImage = "registry-medialab.afp.com/weverify-wrapper:${version}"    
+	                println "image ${dockerImage}"
+	                def buidImage = docker.build('${dockerImage}','./docker/delivery')           	                          
 	        	}
               }                
         }
