@@ -5,8 +5,7 @@ RUN mkdir -p /usr/share/man/man1 && apt-get update --allow-releaseinfo-change &&
 
 FROM base
 
-#COPY ./weverify-wrapper-webapp/target/weverify-wrapper-webapp.jar weverify-wrapper-webapp.jar
-COPY . . 
+COPY ./weverify-wrapper-webapp/target/weverify-wrapper-webapp.jar weverify-wrapper-webapp.jar 
 
 ENV PROFILE=prod
 
