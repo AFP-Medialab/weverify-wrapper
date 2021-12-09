@@ -9,14 +9,23 @@ pipeline {
     agent any
     
     stages {
-    stage ('Initialize') {
+    	stage ('Build package') {
+                    
             steps {
-                sh '''
-                    echo "PATH = ${PATH}"
-                    echo "M2_HOME = ${M2_HOME}"
-                '''
+                sh '${M2_HOME}/bin/mvn -B -DskipTests clean package' 
             }
         }
+        stage ('Build Docker Image') {
+        	script {
+                def version = sh script: '${M2_HOME}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
+                println "version ${version}"
+                dockerImage = "registry-medialab.afp.com/weverify-wrapper:${version}"    
+                buidImage = docker.build dockerImage './docker/delivery'           	                          
+        	}
+                                 
+        }
+
+      
     
        
 
