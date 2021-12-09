@@ -25,7 +25,6 @@ pipeline {
 	                def dockerImage = "registry-medialab.afp.com/weverify-wrapper:${version}"    
 	                println "image ${dockerImage}"
 	                docker.withRegistry('https://'+registry, registryCredential) {
-	                	sh 'ls -l -R'
 	                	def buidImage = docker.build("${dockerImage}","./docker/delivery")
 	                }           	                          
 	        	}
