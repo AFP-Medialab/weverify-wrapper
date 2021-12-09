@@ -26,11 +26,18 @@ pipeline {
 	                println "image ${dockerImage}"
 	                docker.withRegistry('https://'+registry, registryCredential) {
 	                	def buidImage = docker.build("${dockerImage}","-f ./docker/delivery/Dockerfile .")
+	                	buidImage.push()
+	                	buidImage.push('latest')
 	                }           	                          
 	        	}
               }                
         }
-
+        stage('Cleaning Up') {
+           
+            steps{
+                sh "docker rmi --force $dockerImage"
+            }
+        }
       
     
        
