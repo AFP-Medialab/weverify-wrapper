@@ -22,7 +22,7 @@ pipeline {
 	                def version = sh script: '${M2_HOME}/bin/mvn help:evaluate -Dexpression=project.version -q -DforceStdout', returnStdout: true
 	                println "version ${version}"
 	                //unstash 'weverify-wrapper-webapp.jar'
-	                def dockerImage = "registry-medialab.afp.com/weverify-wrapper:${version}"    
+	                dockerImage = "registry-medialab.afp.com/weverify-wrapper:${version}"    
 	                println "image ${dockerImage}"
 	                docker.withRegistry('https://'+registry, registryCredential) {
 	                	def buidImage = docker.build("${dockerImage}","-f ./docker/delivery/Dockerfile .")

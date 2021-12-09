@@ -15,7 +15,7 @@
 	<name>weverify-wrapper</name>
 	<properties>
 		<java.version>11</java.version>
-		<revision>2.2.12</revision>
+		<revision>2.2.13</revision>
 		<docker-maven-plugin.version>1.0.0</docker-maven-plugin.version>
 		<docker.image.name>${project.name}</docker.image.name>
 		<docker.image.tag>2.2.13</docker.image.tag>
