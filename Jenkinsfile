@@ -11,7 +11,7 @@ pipeline {
     stages {
     	stage ('Build package') {
             when {
-                branch 'master'
+                branch 'main'
             }
             steps {
                 sh '${M2_HOME}/bin/mvn -B -DskipTests clean package' 
@@ -19,7 +19,7 @@ pipeline {
         }
         stage ('Build Docker Image') {
         	when {
-                branch 'master'
+                branch 'main'
             }
         	steps{
 	        	script {
@@ -36,7 +36,7 @@ pipeline {
         }
         stage('Cleaning Up') {
            	when {
-                branch 'master'
+                branch 'main'
             }
             steps{
                 sh "docker rmi --force $dockerImage"
