@@ -25,6 +25,7 @@ public class CollectRequest {
 	private Set<String> bannedWords;
 	@JsonDeserialize(using = SetStringNormalizerDeserializer.class)
 	private Set<String> keywordAnyList;
+	@JsonDeserialize(using = LangDeserializer.class)
 	@LangConstrain
 	private String lang;
 	@JsonDeserialize(using = SetStringNormalizerDeserializer.class)
