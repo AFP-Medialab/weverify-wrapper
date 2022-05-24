@@ -14,6 +14,7 @@ pipeline {
                 branch 'main'
             }
             steps {
+            	slackSend channel: 'medialab_builds', message: "Start build ${env.JOB_NAME} - ID: ${env.BUILD_ID}", tokenCredentialId: 'medialab_slack_token'
                 sh '${M2_HOME}/bin/mvn -B -DskipTests clean package' 
             }
         }
