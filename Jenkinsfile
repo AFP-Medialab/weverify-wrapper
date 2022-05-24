@@ -42,9 +42,14 @@ pipeline {
                 sh "docker rmi --force $dockerImage"
             }
         }
-      
-    
-       
-
     }
+    post {
+        success {
+            slackSend channel: 'medialab_builds', message: "Success build & deploy project ${env.JOB_NAME} - ID: ${env.BUILD_ID}", tokenCredentialId: 'medialab_slack_token'
+        }
+        failure {
+            slackSend channel: 'medialab_builds', message: "Error building project ${env.JOB_NAME} - ID: ${env.BUILD_ID}", tokenCredentialId: 'medialab_slack_token'
+        }
+    }
+
 }
