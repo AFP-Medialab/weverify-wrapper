@@ -13,7 +13,6 @@ import org.springframework.web.client.RestTemplate;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 
-
 @Configuration
 public class WeverifyConfiguration {
 
@@ -24,14 +23,16 @@ public class WeverifyConfiguration {
 
 	@Value("${application.elasticsearch.port}")
 	private String esPort;
-	
+
 	@Value("${application.elasticsearch.user}")
 	private String esUser;
-	
+
 	@Value("${application.elasticsearch.password}")
 	private String esPassword;
 
-	
+	@Value("${application.elasticsearch.authentication}")
+	private boolean isAuthenticate;
+
 	@Bean
 	public RestHighLevelClient elasticsearchClient() {
 
@@ -39,11 +40,15 @@ public class WeverifyConfiguration {
 		HttpHeaders httpHeaders = new HttpHeaders();
 		httpHeaders.add("Host", esHost);
 		httpHeaders.add("Accept", "application/vnd.elasticsearch+json;compatible-with=7");
-		httpHeaders.add("Content-Type", "application/vnd.elasticsearch+json;"
-			    + "compatible-with=7");
+		httpHeaders.add("Content-Type", "application/vnd.elasticsearch+json;" + "compatible-with=7");
 		String esURL = esHost + ":" + esPort;
-		final ClientConfiguration clientConfiguration = ClientConfiguration.builder().connectedTo(esURL)
-				.withDefaultHeaders(httpHeaders).withBasicAuth(esUser, esPassword).build();
+		final ClientConfiguration clientConfiguration;
+		if (isAuthenticate)
+			clientConfiguration = ClientConfiguration.builder().connectedTo(esURL).withDefaultHeaders(httpHeaders)
+					.withBasicAuth(esUser, esPassword).build();
+		else
+			clientConfiguration = ClientConfiguration.builder().connectedTo(esURL).withDefaultHeaders(httpHeaders)
+					.build();
 		return RestClients.create(clientConfiguration).rest();
 	}
 
@@ -51,6 +56,5 @@ public class WeverifyConfiguration {
 	public RestTemplate getRestTemplate() {
 		return new RestTemplate();
 	}
-
 
 }

@@ -16,7 +16,8 @@ application:
     host: ${ES_HOST:localhost}
     port: ${ES_PORT:9200}
     user: ${ES_USER:elastic}
-    password: ${ES_PASSWORD:twfUEvNNFWVtUv_3b8u9} 
+    password: ${ES_PASSWORD:twfUEvNNFWVtUv_3b8u9}
+    authentication: ${ES_IS_AUTH:true}
   notification:
     slack: ${SLACK_URL:}
        
