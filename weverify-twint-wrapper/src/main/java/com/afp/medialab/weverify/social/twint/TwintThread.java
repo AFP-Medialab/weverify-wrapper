@@ -44,6 +44,9 @@ public class TwintThread {
 	@Value("${application.elasticsearch.authentication}")
 	private boolean isAuthenticate;
 
+	@Value("${application.elasticsearch.secure}")
+	private boolean isSecure;
+
 	@Value("${application.twint-wrapper.twintcall.twint_thread_nb_restart_on_error}")
 	private Long restart_time;
 	
@@ -98,7 +101,7 @@ public class TwintThread {
 		// String twintRequest =
 		// TwintRequestGenerator.getInstance().generateRequest(request, session,
 		// isDocker, esURL);
-		String esCnxURL = isAuthenticate ? esUser+":"+esPassword+"@"+esURL : esURL;
+		String esCnxURL = (isSecure ? "https://" : "http://" ) + (isAuthenticate ? esUser+":"+esPassword+"@" : "") + esURL;
 		String twintRequest = TwintPlusRequestBuilder.getInstance().generateRequest(request, session, isDocker, esCnxURL, limit);
 
 		ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", twintCall + twintRequest);
