@@ -18,6 +18,7 @@ application:
     user: ${ES_USER:elastic}
     password: ${ES_PASSWORD:twfUEvNNFWVtUv_3b8u9}
     authentication: ${ES_IS_AUTH:true}
+    secure: ${ES_IS_SECURE:false}
   notification:
     slack: ${SLACK_URL:}
        

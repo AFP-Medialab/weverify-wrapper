@@ -26,12 +26,24 @@ public class ProxyServiceController {
 	@Value("${application.elasticsearch.port}")
 	private String esPort;
 
+	@Value("${application.elasticsearch.secure}")
+	private boolean isSecure;
+
 	private String esURL;
 
 	@PostConstruct
 	private void init() {
+		StringBuilder urlBuilder = new StringBuilder();
+		if(!esHost.startsWith("http")) {
+			urlBuilder.append("http");
+			if(isSecure) urlBuilder.append("s");
+			urlBuilder.append("://");
+		}
+		urlBuilder.append(esHost);
+		urlBuilder.append(":");
+		urlBuilder.append(esPort);
+		this.esURL = urlBuilder.toString();
 
-		this.esURL = (esHost.startsWith("http") ? esHost : "http://" + esHost) + ":" + esPort;
 	}
 
 	@Autowired
