@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
+import org.springframework.data.elasticsearch.client.ClientConfiguration.MaybeSecureClientConfigurationBuilder;
 import org.springframework.data.elasticsearch.client.RestClients;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.client.RestTemplate;
@@ -46,8 +47,8 @@ public class WeverifyConfiguration {
 		httpHeaders.add("Content-Type", "application/vnd.elasticsearch+json;" + "compatible-with=7");
 		String esURL = esHost + ":" + esPort;
 		final ClientConfiguration.MaybeSecureClientConfigurationBuilder baseBuilder =
-						ClientConfiguration.builder().connectedTo(esURL);
-		final ClientConfiguration.TerminalClientConfigurationBuilder terminalBuilder;
+						(MaybeSecureClientConfigurationBuilder) ClientConfiguration.builder().connectedTo(esURL).withDefaultHeaders(httpHeaders);
+		final ClientConfiguration.TerminalClientConfigurationBuilder terminalBuilder ;
 		if(isSecure)
 			terminalBuilder = baseBuilder.usingSsl();
 		else
