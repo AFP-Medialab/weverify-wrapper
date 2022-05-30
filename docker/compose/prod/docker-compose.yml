@@ -2,11 +2,12 @@ version: '3.7'
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.6.0
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.1
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
+      - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
@@ -38,7 +39,7 @@ services:
       - esnet
       
   weverify-wrapper:
-    image: registry-medialab.afp.com/weverify-wrapper:2.2.13
+    image: weverify-wrapper-webapp:2.2.16
     container_name: weverify-wrapper
     restart: on-failure
     depends_on:
@@ -48,11 +49,12 @@ services:
     ports:
       - 8080:8080
     environment:
-      MYSQL_TWINT-WRAPPER_URL: "jdbc:mysql://mysql:3306/twint-wrapper?serverTimezone=UTC&useSSL=false"
+      MYSQL_TWINT_WRAPPER_URL: "jdbc:mysql://mysql:3306/twint-wrapper?serverTimezone=UTC&useSSL=false"
       MYSQL_ENVISU4_URL: "jdbc:mysql://mysql:3306/envisu4?serverTimezone=UTC&useSSL=false"
       ES_URL: elasticsearch:9200
       ES_HOST: elasticsearch
       ES_PORT: 9200
+      ES_IS_AUTH: false
       FUSIONAUTH_URL: http://fusionauth:9011
       FUSIONAUTH_ISSUER: weverify.eu
       TWITIE_IS_SPACY: "false"

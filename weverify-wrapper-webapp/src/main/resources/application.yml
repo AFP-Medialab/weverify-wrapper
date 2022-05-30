@@ -18,14 +18,15 @@ application:
     user: ${ES_USER:elastic}
     password: ${ES_PASSWORD:twfUEvNNFWVtUv_3b8u9}
     authentication: ${ES_IS_AUTH:true}
+    secure: ${ES_IS_SECURE:false}
   notification:
     slack: ${SLACK_URL:}
        
   twint-wrapper: 
     datasource:
-      url: ${MYSQL_TWINT-WRAPPER_URL:jdbc:mysql://localhost:3308/twint-wrapper?serverTimezone=CET&useSSL=false}
-      username: ${MYSQL_TWINT-WRAPPER_USER:dev1}
-      password: ${MYSQL_TWINT-WRAPPER_PASSWD:dev1}
+      url: ${MYSQL_TWINT_WRAPPER_URL:jdbc:mysql://localhost:3308/twint-wrapper?serverTimezone=CET&useSSL=false}
+      username: ${MYSQL_TWINT_WRAPPER_USER:dev1}
+      password: ${MYSQL_TWINT_WRAPPER_PASSWD:dev1}
      
     
     home: 
