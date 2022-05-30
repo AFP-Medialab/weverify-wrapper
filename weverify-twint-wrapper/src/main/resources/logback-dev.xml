@@ -7,5 +7,5 @@
 	<logger name="com.afp.medialab.weverify.social"
 		level="DEBUG">
 	</logger>
-
+	<!--logger name="org.springframework.data.elasticsearch.client.WIRE" level="trace"/-->
 </included>

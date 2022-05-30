@@ -45,8 +45,9 @@ public class TwintPlusRequestBuilder {
 			String untilStr = format.format(cr.getUntil());
 			cmdBuff.append(" --until '" + untilStr + "'");
 		}
-		cmdBuff.append(" -ee " + esURL + " -es --index-name tsna");
 		cmdBuff.append(" --essid " + id);
+		cmdBuff.append(" -ee " + esURL + " -es --index-name tsna");
+		
 		if(limit > 0)
 			cmdBuff.append("  --limit "+ limit);
 		String twintPlusCmd = cmdBuff.toString();

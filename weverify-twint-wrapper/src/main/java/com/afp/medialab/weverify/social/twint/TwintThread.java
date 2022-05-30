@@ -34,6 +34,15 @@ public class TwintThread {
 
 	@Value("${application.elasticsearch.url}")
 	private String esURL;
+	
+	@Value("${application.elasticsearch.user}")
+	private String esUser;
+	
+	@Value("${application.elasticsearch.password}")
+	private String esPassword;
+	
+	@Value("${application.elasticsearch.authentication}")
+	private boolean isAuthenticate;
 
 	@Value("${application.twint-wrapper.twintcall.twint_thread_nb_restart_on_error}")
 	private Long restart_time;
@@ -89,12 +98,18 @@ public class TwintThread {
 		// String twintRequest =
 		// TwintRequestGenerator.getInstance().generateRequest(request, session,
 		// isDocker, esURL);
-		String twintRequest = TwintPlusRequestBuilder.getInstance().generateRequest(request, session, isDocker, esURL, limit);
+		String esCnxURL = isAuthenticate ? esUser+":"+esPassword+"@"+esURL : esURL;
+		String twintRequest = TwintPlusRequestBuilder.getInstance().generateRequest(request, session, isDocker, esCnxURL, limit);
 
 		ProcessBuilder processBuilder = new ProcessBuilder("/bin/bash", "-c", twintCall + twintRequest);
 		processBuilder.environment().put("PATH", "/usr/bin:/usr/local/bin:/bin");
-		Logger.info(twintCall + twintRequest);
+		Logger.info(twintCall + secureLogger(twintRequest));
 		return processBuilder;
+	}
+	
+	private String secureLogger(String twintRequest) {
+		int lastIndex = twintRequest.indexOf("-ee");
+		return twintRequest.substring(0, lastIndex);
 	}
 
 	private Integer callProcess(ProcessBuilder processBuilder, String got) throws IOException {
