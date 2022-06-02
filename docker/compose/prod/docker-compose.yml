@@ -2,12 +2,12 @@ version: '3.7'
 
 services:
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.1
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.2
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - xpack.security.enabled=false
+      #- xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
       memlock:
@@ -39,7 +39,7 @@ services:
       - esnet
       
   weverify-wrapper:
-    image: weverify-wrapper-webapp:2.2.16
+    image: registry-medialab.afp.com/weverify-wrapper:2.2.17
     container_name: weverify-wrapper
     restart: on-failure
     depends_on:
@@ -54,7 +54,8 @@ services:
       ES_URL: elasticsearch:9200
       ES_HOST: elasticsearch
       ES_PORT: 9200
-      ES_IS_AUTH: false
+      ES_IS_AUTH: true
+      ES_PASSWORD: ${ES_PASSWORD}
       FUSIONAUTH_URL: http://fusionauth:9011
       FUSIONAUTH_ISSUER: weverify.eu
       TWITIE_IS_SPACY: "false"
