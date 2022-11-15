@@ -69,7 +69,7 @@ application:
       demo_id: ${IPOL_DEMO_ID:77777000125}
     
     ffmpeg:
-      path: ${FFMPEG_PATH:/usr/local/bin/ffmpeg}
+      path: ${FFMPEG_PATH:/usr/bin/ffmpeg}
     
 
 spring:
