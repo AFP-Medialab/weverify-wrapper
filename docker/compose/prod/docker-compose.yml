@@ -39,7 +39,7 @@ services:
       - esnet
       
   weverify-wrapper:
-    image: registry-medialab.afp.com/weverify-wrapper:2.2.17
+    image: registry-medialab.afp.com//weverify-wrapper:2.2.18
     container_name: weverify-wrapper
     restart: on-failure
     depends_on:
@@ -63,6 +63,7 @@ services:
       TWITIE_THREADS: 10
       SLACK_URL: ${SLACK_URL}
       ACTUATOR_PASSWORD: ${ACTUATOR_PASSWORD}
+      FFMPEG_PATH: ${FFMPEG_PATH}
       
       PROFILE: demo,default
     logging:

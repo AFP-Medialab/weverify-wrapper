@@ -12,7 +12,10 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.Test;
+
+import net.bramp.ffmpeg.FFmpeg;
+import net.bramp.ffmpeg.FFmpegExecutor;
+import net.bramp.ffmpeg.builder.FFmpegBuilder;
 
 class TestCreateAnimatedImages {
 
@@ -23,6 +26,8 @@ class TestCreateAnimatedImages {
 	private String image1 = "/Users/bertrand/git/afp/weverify/weverify-wrapper/weverify-envisu4/src/test/resources/Tampered.jpg";
 	private String image2 = "/Users/bertrand/git/afp/weverify/weverify-wrapper/weverify-envisu4/src/test/resources/reveal-mask-1.png";
 	private String output1 = "/Users/bertrand/git/afp/weverify/weverify-wrapper/weverify-envisu4/src/test/resources/output-1.gif";
+	private String video1 = "/Users/bertrand/git/afp/weverify/weverify-wrapper/weverify-envisu4/src/test/resources/output-video.mp4";
+	private String video2 = "/Users/bertrand/git/afp/weverify/weverify-wrapper/weverify-envisu4/src/test/resources/output-2-video.mp4";
 
 	private String url1 = "https://mever.iti.gr/envisu4/uploads/Tampered.jpg";
 	private String url2 = "https://mever.iti.gr/envisu4/api/v4/images/77174351879669c966fb411143c86ab5/DQOutput_mask.png";
@@ -34,7 +39,13 @@ class TestCreateAnimatedImages {
 	private String output5 = "/Users/bertrand/git/afp/weverify/weverify-wrapper/weverify-envisu4/src/test/resources/conver-gueulle.g";
 	private String output6 = "/Users/bertrand/git/afp/weverify/weverify-wrapper/weverify-envisu4/src/test/resources/conver-gueulle.webp";
 
-	// @Test
+	
+	
+	/*public void main(String args[]) {
+		TestCreateAnimatedImages tcav = new TestCreateAnimatedImages();
+		tcav.testVideoJcodec();
+	}*/
+	//@org.junit.jupiter.api.Test
 	void test() {
 		String inputs[] = new String[] { image1, image2 };
 		alphaGifWriter.convert(inputs, output1, 500, true);
@@ -116,6 +127,41 @@ class TestCreateAnimatedImages {
 	                ex.printStackTrace();
 	            }
 	        }
+	}
+	
+	
+	//Œ@org.junit.jupiter.api.Test
+	public void testFfmpeg() {
+		try {
+			FFmpeg fFmpeg = new FFmpeg("/usr/local/bin/ffmpeg");
+			FFmpegBuilder builder = new FFmpegBuilder()
+					.setInput(output1)
+					.overrideOutputFiles(true)
+					.addOutput(video2)
+					.setFormat("mp4")
+					.setVideoMovFlags("faststart")
+					.setVideoPixelFormat("yuv420p")
+					.setVideoFilter("scale=trunc(iw/2)*2:trunc(ih/2)*2")
+					.setVideoFrameRate(1.0)
+					.done();
+			
+			//ffmpeg -i output-1.gif -movflags faststart -pix_fmt yuv420p -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -r 1 output-1.mp4
+			
+			FFmpegExecutor executor = new FFmpegExecutor(fFmpeg);
+			executor.createJob(builder).run();
+
+			// Or run a two-pass encode (which is better quality at the cost of being slower)
+			//executor.createJob(builder).run();
+			//executor.createTwoPassJob(builder).run();
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		catch (IllegalArgumentException e) {
+			System.out.println("do nothing " + e.getMessage());
+		}
+		
 	}
 	
 }
