@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 import javax.imageio.ImageIO;
@@ -20,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.afp.medialab.weverify.envisu4.tools.controller.exception.IpolProxyException;
 import com.afp.medialab.weverify.envisu4.tools.controller.exception.ServiceErrorCode;
+import com.afp.medialab.weverify.envisu4.tools.controller.exception.VideoCreationException;
+import com.google.common.io.Files;
 
 @Component
 public class FileUtils {
@@ -30,10 +35,37 @@ public class FileUtils {
 
 	@PostConstruct
 	public void init() {
-		tempDir = new File("./temp_image");
+        final Path path = Paths.get(org.apache.commons.io.FileUtils.getTempDirectory().getAbsolutePath(), UUID.randomUUID().toString());
+        try {
+			tempDir = java.nio.file.Files.createDirectories(path).toFile();
+			tempDir.deleteOnExit();
+		} catch (IOException e) {
+			Logger.error("unable to create temporary folder in system {} ", e.getMessage());
+		}
+        
+		/*tempDir = new File("./temp_image");
 		if (!tempDir.exists()) {
 			System.out.println("mkdir:" + tempDir.mkdirs());
-		}
+		}*/
+	}
+	/**
+	 * convert byte array to a temporaty file
+	 * @param content byte content
+	 * @param md5sumFileName file name
+	 * @param format file format (gif, mp4, etc)
+	 * @return temp file
+	 * @throws VideoCreationException 
+	 */
+	public File convert(byte[] content, String md5sumFileName, String format) throws IOException {
+		File tempFile = new File(this.tempDir, md5sumFileName + "." + format.toLowerCase());
+		Files.write(content, tempFile);
+		return tempFile;
+	}
+	
+	public byte[] convertFileTobyte(File file) throws IOException {
+		byte[] bytes = Files.toByteArray(file);
+		file.delete();
+		return bytes;
 	}
 
 	/**
@@ -90,5 +122,11 @@ public class FileUtils {
 		}
 		return convFile;
 	}
+	
+	public File getTempDir() {
+		return tempDir;
+	}
+	
+	
 
 }
