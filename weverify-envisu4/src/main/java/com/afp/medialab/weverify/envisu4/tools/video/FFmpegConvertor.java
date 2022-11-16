@@ -70,9 +70,8 @@ public class FFmpegConvertor {
 		} catch (IOException e) {
 			Logger.error("failed converting output video file {}", md5sum);
 			throw new VideoCreationException(ServiceErrorCode.VIDEO_CREATION_ERROR_FAILED, "Fail to create video");
-		}
-		finally {
-			if(tempAnimatedGifFile.exists())
+		} finally {
+			if (tempAnimatedGifFile.exists())
 				tempAnimatedGifFile.delete();
 		}
 
@@ -80,17 +79,17 @@ public class FFmpegConvertor {
 
 	/**
 	 * convert delay in milliseconds to time rate
+	 * 
 	 * @param delay
 	 * @return
 	 */
 	private double delayToRate(int delay) {
 		BigDecimal bdelay = new BigDecimal(delay);
-		BigDecimal decRate = new BigDecimal(1).divide(bdelay.divide(new BigDecimal(1000)));
-		BigDecimal decRateRound =  decRate.setScale(2, RoundingMode.HALF_UP);
-		double rate = decRateRound.doubleValue();
-		if(rate < 0.5)
+		BigDecimal decRate = new BigDecimal(1).divide(bdelay.divide(new BigDecimal(1000)), 2, RoundingMode.HALF_UP);
+		double rate = decRate.doubleValue();
+		if (rate < 0.5)
 			rate = 0.5;
-		else if(rate > 4.0)
+		else if (rate > 4.0)
 			rate = 4.0;
 		return rate;
 	}
