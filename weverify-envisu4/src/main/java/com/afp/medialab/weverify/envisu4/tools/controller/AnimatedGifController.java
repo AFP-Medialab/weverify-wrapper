@@ -81,6 +81,7 @@ public class AnimatedGifController {
 		try {
 			byte[] content = createAnimatedGif(createAnimatedGifRequest);
 			String md5sum = DigestUtils.md5Hex(content);
+			storeMediaContent(content, md5sum);
 			//create mp4
 			byte[] videoContent = ffmpegConvertor.convert(content, md5sum, createAnimatedGifRequest.getDelay());
 			MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
@@ -141,13 +142,17 @@ public class AnimatedGifController {
 	}
 	
 	@Operation(summary = "create mp4 from stored animated gif", description = "Create mp4 from stored animated giffrom database")
-	@RequestMapping(path = { "/video/{imageId}/{delay}" }, method = RequestMethod.GET, produces ="video/mp4")
-	public Resource getVideofromId(@PathVariable String imageId, @PathVariable int delay, @AuthenticationPrincipal Jwt principal) throws AnimatedGifCreationException {
+	@RequestMapping(path = { "/video/{imageId}", "/video/{imageId}/{delay}" }, method = RequestMethod.GET, produces ="video/mp4")
+	public Resource getVideofromId(@PathVariable String imageId, @PathVariable() Optional<Integer> delay, @AuthenticationPrincipal Jwt principal) throws AnimatedGifCreationException {
 		Logger.info("GET /video/{} - user_id: {}", imageId, principal.getClaimAsString("sub"));
+		int intDelay = 500;
+		if(delay.isPresent())
+			intDelay = delay.get().intValue();
+			
 		byte[] content = getStoreContent(imageId);
 		//content exist
 		try {
-			byte[] videoContent = ffmpegConvertor.convert(content, imageId, delay);
+			byte[] videoContent = ffmpegConvertor.convert(content, imageId, intDelay);
 			return new ByteArrayResource(videoContent);
 		} catch (VideoCreationException e) {
 			Logger.error("Video General error", e);
