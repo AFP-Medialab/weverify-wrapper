@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 import javax.annotation.PostConstruct;
 
@@ -29,6 +31,7 @@ public class FFmpegConvertor {
 	@Value("${application.envisu4.ffmpeg.path}")
 	private String FFMPEG_COMMAND;
 	private FFmpeg FFmpeg;
+	private SimpleDateFormat format1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	@Autowired
 	private FileUtils fileUtils;
@@ -51,9 +54,11 @@ public class FFmpegConvertor {
 		Logger.debug("input file path {}", tempAnimatedGifFile.getAbsolutePath());
 		Logger.debug("output file path {}", videoFile.getAbsolutePath());
 		double rate = delayToRate(delay);
+		String date = format1.format(Calendar.getInstance().getTime());
 		Logger.debug("rate {}", rate);
 		FFmpegBuilder builder = new FFmpegBuilder().setInput(tempAnimatedGifFile.getAbsolutePath())
 				.overrideOutputFiles(true).addOutput(videoFile.getAbsolutePath()).setFormat("mp4")
+				.addMetaTag("creation_time", date)
 				.setVideoMovFlags("faststart").setVideoPixelFormat("yuv420p")
 				.setVideoFilter("scale=trunc(iw/2)*2:trunc(ih/2)*2").setVideoFrameRate(rate).done();
 
