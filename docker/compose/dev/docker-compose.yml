@@ -7,7 +7,7 @@ services:
     environment:
       - discovery.type=single-node
       - bootstrap.memory_lock=true
-      - path.repo=/mnt/backup
+      #- path.repo=/mnt/backup
       #- xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ulimits:
@@ -16,7 +16,7 @@ services:
         hard: -1
     volumes:
       - esdata1:/usr/share/elasticsearch/data
-      - ${SNAPSHOP_REPO}:/mnt/backup
+      #- ${SNAPSHOP_REPO}:/mnt/backup
     ports:
       - 9200:9200
     networks:
@@ -32,7 +32,8 @@ services:
         MYSQL_DATABASE: twint-wrapper
         TZ: UTC
     volumes:
-      - dev_mysqldata1:/var/lib/mysql
+      #- dev_mysqldata1:/var/lib/mysql
+      - mysqldata1:/var/lib/mysql
       - ./fusionauth-2020-weverify.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - 3308:3306
@@ -40,11 +41,11 @@ services:
       - esnet
      
   fusionauth:
-    image: fusionauth/fusionauth-app:latest
+    image: fusionauth/fusionauth-app:1.36.7
     depends_on:
       - mysql
     environment:
-      DATABASE_URL: jdbc:mysql://mysql:3306/fusionauth?serverTimezone=UTC
+      DATABASE_URL: jdbc:mysql://mysql:3306/fusionauth?serverTimezone=UTC&characterEncoding=UTF-8
       DATABASE_ROOT_USERNAME: root
       DATABASE_ROOT_PASSWORD: devpass123
       DATABASE_USERNAME: dev1
@@ -119,12 +120,13 @@ services:
         labels: "twitie-log"   
     
 volumes:
-  dev_mysqldata1:
-    external: true
+  #dev_mysqldata1:
+    #external: true
   esdata1:
   es_fusion_data:
   fa_config:
-  
+  mysqldata1:
+
 networks:
   esnet:
 
