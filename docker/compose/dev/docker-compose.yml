@@ -39,6 +39,7 @@ services:
       - 3308:3306
     networks:
       - esnet
+    command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
      
   fusionauth:
     image: fusionauth/fusionauth-app:1.36.7
