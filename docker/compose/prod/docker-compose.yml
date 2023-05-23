@@ -39,7 +39,7 @@ services:
       - esnet
       
   weverify-wrapper:
-    image: registry-medialab.afp.com//weverify-wrapper:2.2.18
+    image: registry-medialab.afp.com/weverify-wrapper:2.2.19
     container_name: weverify-wrapper
     restart: on-failure
     depends_on:
@@ -90,7 +90,7 @@ services:
         labels: "twitie-log"
      
   fusionauth:
-    image: fusionauth/fusionauth-app:latest
+    image: fusionauth/fusionauth-app:1.36.7
     depends_on:
       - mysql      
     environment:
