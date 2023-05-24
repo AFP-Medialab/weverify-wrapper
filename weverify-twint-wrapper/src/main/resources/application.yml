@@ -1,0 +1,38 @@
+application:
+  home:
+    msg: Service is Up
+  twint:
+    limit: 
+      default: ${TWINT_LIMIT_DEFAULT:15000}
+      min: ${TWINT_LIMIT_MIN:15000}
+      medium: ${TWINT_LIMIT_DEFAULT:30000}
+      max: ${TWINT_LIMIT_MAX:60000}
+    
+  twintcall:
+    nb-core-threads: 24
+    nb-max-threads: 80
+    nb-queue-threads: 64
+    grp-nb-core-threads: 4
+    grp-nb-max-threads: 4
+    twint_request_maximum_days : 15
+    twint_big_request_subdivisions : 6
+    twint_thread_nb_restart_on_error : 3
+  elasticsearch:
+    url: ${ES_URL:elasticsearch:9200}
+    host: ${ES_HOST:localhost}
+    port: ${ES_PORT:9200}
+    
+  twitie:
+    isSpacyVersion: ${TWITIE_IS_SPACY:true}
+    url: ${TWITIE_URL:http://localhost:8081/process}
+    threads: ${TWITIE_THREADS:8}
+    es:
+      pagesize: ${TWITIE_ES_PAGESIZE:100}
+      bulksize: ${TWITIE_ES_BULKSIZE:5000}
+  notification:
+    slack: ${SLACK_URL:}
+  actuator:
+    user: ${ACTUATOR_USER:actuator}
+    #password is generate with GeneratePassword class default is "actuator"
+    passwd: ${ACTUATOR_PASSWORD:{bcrypt}$2a$10$haLsRQkZdhF1FtzV4iXFi.MiPOlDKN.i4FaWrjitA3eDFwoWeuMa2}
+  

@@ -1,0 +1,170 @@
+server:
+  servlet:
+    context-path: /weverify-wrapper
+  port: 8080
+logging:
+  level:
+    root: INFO
+
+application:
+  actuator:
+    user: ${ACTUATOR_USER:actuator}
+    #password is generate with GeneratePassword class default is "actuator"
+    passwd: ${ACTUATOR_PASSWORD:{bcrypt}$2a$10$haLsRQkZdhF1FtzV4iXFi.MiPOlDKN.i4FaWrjitA3eDFwoWeuMa2}
+  elasticsearch:
+    url: ${ES_URL:elasticsearch:9200}
+    host: ${ES_HOST:localhost}
+    port: ${ES_PORT:9200}
+    user: ${ES_USER:elastic}
+    password: ${ES_PASSWORD:twfUEvNNFWVtUv_3b8u9}
+    authentication: ${ES_IS_AUTH:true}
+    secure: ${ES_IS_SECURE:false}
+  notification:
+    slack: ${SLACK_URL:}
+       
+  twint-wrapper: 
+    datasource:
+      url: ${MYSQL_TWINT_WRAPPER_URL:jdbc:mysql://localhost:3308/twint-wrapper?serverTimezone=CET&useSSL=false}
+      username: ${MYSQL_TWINT_WRAPPER_USER:dev1}
+      password: ${MYSQL_TWINT_WRAPPER_PASSWD:dev1}
+     
+    
+    home: 
+      msg: Service is Up
+      
+    twint:
+      command: docker run --rm --network dev_esnet -i ttwo:1.0
+      limit: 
+        default: ${TWINT_LIMIT_DEFAULT:15000}
+        min: ${TWINT_LIMIT_MIN:15000}
+        medium: ${TWINT_LIMIT_DEFAULT:30000}
+        max: ${TWINT_LIMIT_MAX:60000}
+    
+    twintcall:
+      nb-core-threads: 24
+      nb-max-threads: 80
+      nb-queue-threads: 64
+      grp-nb-core-threads: 4
+      grp-nb-max-threads: 4
+      twint_request_maximum_days : 15
+      twint_big_request_subdivisions : 6
+      twint_thread_nb_restart_on_error : 3
+    
+    twitie:
+      isSpacyVersion: ${TWITIE_IS_SPACY:true}
+      url: ${TWITIE_URL:http://localhost:8081/process}
+      threads: ${TWITIE_THREADS:8}
+      es:
+        pagesize: ${TWITIE_ES_PAGESIZE:100}
+        bulksize: ${TWITIE_ES_BULKSIZE:5000}
+  
+  envisu4: 
+    datasource:
+      url: ${MYSQL_ENVISU4_URL:jdbc:mysql://localhost:3308/envisu4?serverTimezone=CET&useSSL=false}
+      username: ${MYSQL_ENVISU4_USER:dev1}
+      password: ${MYSQL_ENVISU4_PASSWD:dev1}
+      
+    ipol:
+      endpoint: ${IPOL_ENDPOINT:https://ipolcore.ipol.im}
+      demo_id: ${IPOL_DEMO_ID:77777000125}
+    
+    ffmpeg:
+      path: ${FFMPEG_PATH:/usr/bin/ffmpeg}
+    
+
+spring:
+  application:
+    name: weverify-wrapper
+    admin:
+      enabled: true
+  jackson:
+    time-zone: Europe/Paris
+    deserialization:
+      fail-on-unknown-properties: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${FUSIONAUTH_ISSUER:weverify.eu}
+          jwk-set-uri: ${FUSIONAUTH_URL:http://localhost:9011}/.well-known/jwks.json
+
+    #driver-class-name: com.mysql.jdbc.Driver
+  jpa:
+    database: mysql
+    hibernate.ddl-auto : none
+    hibernate.use-new-id-generator-mappings : false
+    generate-ddl: true
+    show-sql: false
+    properties:
+      "[hibernate.physical_naming_strategy]": org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      "[hibernate.implicit_naming_strategy]": org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+      
+  
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
+
+management:
+  endpoints:
+    enabled-by-default: false
+    web:
+      exposure:
+        include:
+          - health
+          - info
+          - loggers
+      base-path: /manage
+      
+  endpoint:
+    health:
+      enabled: true
+      show-details: when-authorized
+      show-components: when-authorized
+    info:
+      enabled: true
+    loggers:
+      enabled: true
+  info:
+    git:
+      mode: full  
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate.ddl-auto: update
+---
+spring:
+  config:
+    activate:
+      on-profile: demo
+server:
+  servlet:
+    session:
+      cookie:
+        secure: false
+application: 
+  twint-wrapper: 
+    twint:
+      command:  
+---
+server:
+  servlet:
+    context-path: /
+spring:
+  config:
+    activate:
+      on-profile: prod 
+  jpa:
+    hibernate.ddl-auto: none
+    generate-ddl: false
+    show-sql: false
+      
+application: 
+  twint-wrapper: 
+    twint:
+      command:  
+ 
+ 

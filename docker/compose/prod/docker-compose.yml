@@ -1,0 +1,121 @@
+version: '3.7'
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.2.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      #- xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+    networks:
+      - esnet
+  
+  mysql:
+    image: mysql:5.7
+    container_name: mysql
+    restart: on-failure
+    environment:
+        MYSQL_ROOT_PASSWORD: devpass123
+        MYSQL_USER: dev1
+        MYSQL_PASSWORD: dev1
+        MYSQL_DATABASE: twint-wrapper
+        TZ: UTC
+    volumes:
+      - mysqldata1:/var/lib/mysql
+      - ./init-weverify-db.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - 3308:3306
+    networks:
+      - esnet
+      
+  weverify-wrapper:
+    image: registry-medialab.afp.com/weverify-wrapper:2.2.19
+    container_name: weverify-wrapper
+    restart: on-failure
+    depends_on:
+      - mysql
+    networks:
+      - esnet
+    ports:
+      - 8080:8080
+    environment:
+      MYSQL_TWINT_WRAPPER_URL: "jdbc:mysql://mysql:3306/twint-wrapper?serverTimezone=UTC&useSSL=false"
+      MYSQL_ENVISU4_URL: "jdbc:mysql://mysql:3306/envisu4?serverTimezone=UTC&useSSL=false"
+      ES_URL: elasticsearch:9200
+      ES_HOST: elasticsearch
+      ES_PORT: 9200
+      ES_IS_AUTH: true
+      ES_PASSWORD: ${ES_PASSWORD}
+      FUSIONAUTH_URL: http://fusionauth:9011
+      FUSIONAUTH_ISSUER: weverify.eu
+      TWITIE_IS_SPACY: "false"
+      TWITIE_URL: "http://twitie:8080/gate/process"
+      TWITIE_THREADS: 10
+      SLACK_URL: ${SLACK_URL}
+      ACTUATOR_PASSWORD: ${ACTUATOR_PASSWORD}
+      FFMPEG_PATH: ${FFMPEG_PATH}
+      
+      PROFILE: demo,default
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200k"
+        labels: "twint-wrapper"
+  
+  twitie:
+    container_name: twitie
+    image: registry.gitlab.com/european-language-grid/usfd/gate-ie-tools/twitie-snapshot:latest
+    restart: always
+    networks:
+      - esnet
+    ports:
+      - 8081:8080
+    environment:
+      ELG_CONCURRENCY: 4
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "3"
+        labels: "twitie-log"
+     
+  fusionauth:
+    image: fusionauth/fusionauth-app:1.36.7
+    depends_on:
+      - mysql      
+    environment:
+      DATABASE_URL: jdbc:mysql://mysql:3306/fusionauth?serverTimezone=UTC
+      DATABASE_ROOT_USERNAME: root
+      DATABASE_ROOT_PASSWORD: devpass123
+      DATABASE_USERNAME: dev1
+      DATABASE_PASSWORD: dev1
+      FUSIONAUTH_APP_MEMORY: 256M
+      SEARCH_TYPE: database
+      FUSIONAUTH_APP_URL: http://fusionauth:9011
+    networks:
+     - esnet
+    restart: unless-stopped
+    ports:
+      - 9011:9011
+    volumes:
+      - fa_config:/usr/local/fusionauth/config 
+      
+      
+volumes:
+  esdata1: {}
+  mysqldata1: {}
+  fa_config: {}
+ 
+networks:
+  esnet:
+  
