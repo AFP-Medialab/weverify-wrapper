@@ -15,10 +15,10 @@
 	<name>weverify-wrapper</name>
 	<properties>
 		<java.version>11</java.version>
-		<revision>2.2.19</revision>
+		<revision>2.2.20</revision>
 		<docker-maven-plugin.version>1.0.0</docker-maven-plugin.version>
 		<docker.image.name>${project.name}</docker.image.name>
-		<docker.image.tag>2.2.19</docker.image.tag>
+		<docker.image.tag>2.2.20</docker.image.tag>
 	</properties>
 
 	<modules>
@@ -52,7 +52,7 @@
 			<artifactId>spring-data-elasticsearch</artifactId>
 		</dependency>
 		<dependency>
-			<groupId> org.elasticsearch.client</groupId>
+			<groupId>org.elasticsearch.client</groupId>
 			<artifactId>elasticsearch-rest-high-level-client</artifactId>
 		</dependency>
 		<dependency>

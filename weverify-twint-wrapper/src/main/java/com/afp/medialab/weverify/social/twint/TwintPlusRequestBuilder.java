@@ -29,10 +29,10 @@ public class TwintPlusRequestBuilder {
 
 	public String generateRequest(CollectRequest cr, String id, boolean isDocker, String esURL, int limit) {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		//boolean hasUser = false;
+		// boolean hasUser = false;
 		StringBuffer cmdBuff = new StringBuffer();
 
-		cmdBuff.append("tplus -cq ");
+		cmdBuff.append("ttwo -cq ");
 		// search string
 		cmdBuff.append(generateSearch(cr));
 		// Date Range
@@ -47,9 +47,9 @@ public class TwintPlusRequestBuilder {
 		}
 		cmdBuff.append(" --essid " + id);
 		cmdBuff.append(" -ee " + esURL + " -es --index-name tsna");
-		
-		if(limit > 0)
-			cmdBuff.append("  --limit "+ limit);
+
+		if (limit > 0)
+			cmdBuff.append("  --limit " + limit);
 		String twintPlusCmd = cmdBuff.toString();
 		if (isDocker)
 			twintPlusCmd = " \"" + twintPlusCmd + "\"";
@@ -69,13 +69,13 @@ public class TwintPlusRequestBuilder {
 				sb.append(" " + and.get(i));
 			}
 		}
-		
+
 		if (collectRequest.getKeywordAnyList() != null && !collectRequest.getKeywordAnyList().isEmpty()) {
 			ArrayList<String> or = new ArrayList<String>(collectRequest.getKeywordAnyList());
-			if(sb.length() > 0)
-				sb.append(" ("+or.get(0));
-			else 
-				sb.append("("+or.get(0));
+			if (sb.length() > 0)
+				sb.append(" (" + or.get(0));
+			else
+				sb.append("(" + or.get(0));
 			for (int i = 1; i < or.size(); i++) {
 				sb.append(" OR " + or.get(i));
 			}
@@ -88,36 +88,47 @@ public class TwintPlusRequestBuilder {
 			}
 		if (collectRequest.getLang() != null && !collectRequest.getLang().equals(""))
 			sb.append(" lang:" + collectRequest.getLang());
+
+		
 		if (collectRequest.getMedia() != null) {
-			if (collectRequest.getMedia().equals("both"))
+			sb.append(" filter:links");
+			/*if (collectRequest.getMedia().equals("both"))
 				sb.append(" filter:media");
 			else if (collectRequest.getMedia().equals("image"))
 				sb.append(" filter:images");
 			else if (collectRequest.getMedia().equals("video"))
-				sb.append(" filter:native_video");
+				sb.append(" filter:native_video");*/
 		}
-		if(collectRequest.isVerified()) {
+
+		if (collectRequest.isVerified()) {
 			sb.append(" filter:verified");
 		}
 		// users
 		if (collectRequest.getUserList() != null && !collectRequest.getUserList().isEmpty()) {
 			// hasUser = true;
-			String users = String.join("/", collectRequest.getUserList());
-			if (collectRequest.getUserList().size() > 1)
-				sb.append(" list:" + users);
-			else
-				sb.append(" from:" + users);
+			//String users = String.join("/", collectRequest.getUserList());
+			String users = String.join(" OR from:",collectRequest.getUserList());
+			//if (collectRequest.getUserList().size() > 1)
+				//sb.append(" list:" + users);
+				sb.append(" (from:" + users + ")");
+			//else
+			//	sb.append(" from:" + users);
 		}
-		String encodedtwintplusCmd = encodeValue(sb.toString());
+		String encodedtwintplusCmd = completeCustomQuery(sb.toString());
 		Logger.debug("Twint command encoded: {}", encodedtwintplusCmd);
 		return encodedtwintplusCmd;
 	}
-	
+
+	private String completeCustomQuery(String value) {
+		return "'" + value + "'";
+	}
+
+	@SuppressWarnings("unused")
 	private String encodeValue(String value) {
-        try {
-            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
-        } catch (UnsupportedEncodingException ex) {
-            throw new RuntimeException(ex.getCause());
-        }
-    }
+		try {
+			return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+		} catch (UnsupportedEncodingException ex) {
+			throw new RuntimeException(ex.getCause());
+		}
+	}
 }

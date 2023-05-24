@@ -1,5 +1,6 @@
-target
-.settings
-.classpath
-.project
+**/*/.classpath
+**/*/.project
+**/*/target
+**/*/.settings
+**/*/.factorypath
 **/*/.env
