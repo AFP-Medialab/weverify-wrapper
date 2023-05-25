@@ -1,4 +1,4 @@
-FROM ttwo:1.0
+FROM ttwo:1.1
 
 ENV USER_ID=15555
 ENV GROUP_ID=15555
@@ -11,7 +11,7 @@ RUN mkdir -p /usr/share/man/man1 && apt-get update --allow-releaseinfo-change &&
 RUN echo "deb http://security.debian.org/debian-security bullseye-security contrib non-free" >> /etc/apt/sources.list && \		
 		apt-get update && apt-get install ffmpeg x264 -y && rm -rf /var/lib/apt/lists/* /tmp/*
 		
-RUN addgroup -g $GROUP_ID $GROUP_NAME  && \
+RUN groupadd -g $GROUP_ID $GROUP_NAME  && \
     adduser --shell /sbin/nologin --disabled-password \
     --no-create-home --uid $USER_ID --ingroup $GROUP_NAME $USER_NAME
 

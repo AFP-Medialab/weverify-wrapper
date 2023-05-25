@@ -34,9 +34,6 @@ public class TwintThreadGroup {
 	@Value("${application.twint-wrapper.twintcall.twint_big_request_subdivisions}")
 	private Long subdivisions;
 
-	@Value("${application.twint-wrapper.twint.command}")
-	private String twintCall;
-
 	@Autowired
 	CollectService collectService;
 
