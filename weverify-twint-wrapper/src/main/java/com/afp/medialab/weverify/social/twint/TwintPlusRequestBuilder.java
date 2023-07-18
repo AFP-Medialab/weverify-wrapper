@@ -51,8 +51,11 @@ public class TwintPlusRequestBuilder {
 		if (limit > 0)
 			cmdBuff.append("  --limit " + limit);
 		String twintPlusCmd = cmdBuff.toString();
-		if (isDocker)
+		if (isDocker) {
+			twintPlusCmd = twintPlusCmd.replace("\"","\\\"");
 			twintPlusCmd = " \"" + twintPlusCmd + "\"";
+		}
+			
 		Logger.debug("Twint command: {}", twintPlusCmd);
 		return twintPlusCmd;
 	}
@@ -120,7 +123,8 @@ public class TwintPlusRequestBuilder {
 	}
 
 	private String completeCustomQuery(String value) {
-		return "'" + value + "'";
+		value = value.replace("\"", "");
+		return "\"" + value + "\"";
 	}
 
 	@SuppressWarnings("unused")

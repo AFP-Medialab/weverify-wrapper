@@ -33,7 +33,7 @@ application:
       msg: Service is Up
       
     twint:
-      command: docker run --rm --network dev_esnet -i ttwo:1.0
+      command: docker run --rm --network dev_esnet -i ttwo:1.2
       limit: 
         default: ${TWINT_LIMIT_DEFAULT:15000}
         min: ${TWINT_LIMIT_MIN:15000}
