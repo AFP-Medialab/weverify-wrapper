@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.5</version>
+		<version>2.7.15</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.afp.medialab.weverify</groupId>
@@ -14,11 +14,11 @@
 	<packaging>pom</packaging>
 	<name>weverify-wrapper</name>
 	<properties>
-		<java.version>11</java.version>
-		<revision>2.2.21</revision>
+		<java.version>17</java.version>
+		<revision>2.2.22</revision>
 		<docker-maven-plugin.version>1.0.0</docker-maven-plugin.version>
 		<docker.image.name>${project.name}</docker.image.name>
-		<docker.image.tag>2.2.21</docker.image.tag>
+		<docker.image.tag>2.2.22</docker.image.tag>
 	</properties>
 
 	<modules>
@@ -63,6 +63,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.33</version>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
