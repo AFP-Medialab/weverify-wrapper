@@ -5,8 +5,12 @@ ENV GROUP_ID=15555
 ENV USER_NAME=tsna
 ENV GROUP_NAME=tsna
 # install openjre:8
-RUN mkdir -p /usr/share/man/man1 && apt-get update --allow-releaseinfo-change && \
-      apt install openjdk-11-jre tini -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+#RUN mkdir -p /usr/share/man/man1 && apt-get update --allow-releaseinfo-change && \
+#      apt install openjdk-11-jre tini -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+ENV JAVA_HOME=/opt/java/openjdk
+COPY --from=eclipse-temurin:17 $JAVA_HOME $JAVA_HOME
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
 # install ffmpeg
 RUN echo "deb http://security.debian.org/debian-security bullseye-security contrib non-free" >> /etc/apt/sources.list && \		
 		apt-get update && apt-get install ffmpeg x264 -y && rm -rf /var/lib/apt/lists/* /tmp/*
