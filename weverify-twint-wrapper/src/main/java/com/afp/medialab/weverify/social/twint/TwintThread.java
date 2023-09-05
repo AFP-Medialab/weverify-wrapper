@@ -165,6 +165,7 @@ public class TwintThread {
 			result = callProcess(processBuilder, "tweets");
 		} catch (IOException e) {
 			Logger.error("I/O Exception stop process");
+			result = 0;
 			//e.printStackTrace();
 		}
 		return result;
