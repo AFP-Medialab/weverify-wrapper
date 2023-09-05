@@ -1,4 +1,4 @@
-FROM registry-medialab.afp.com/ttwo:1.2
+FROM registry-medialab.afp.com/ttwo:1.3
 
 ENV USER_ID=15555
 ENV GROUP_ID=15555

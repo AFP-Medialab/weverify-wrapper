@@ -15,10 +15,10 @@
 	<name>weverify-wrapper</name>
 	<properties>
 		<java.version>17</java.version>
-		<revision>2.2.23</revision>
+		<revision>2.2.24</revision>
 		<docker-maven-plugin.version>1.0.0</docker-maven-plugin.version>
 		<docker.image.name>${project.name}</docker.image.name>
-		<docker.image.tag>2.2.23</docker.image.tag>
+		<docker.image.tag>2.2.24</docker.image.tag>
 	</properties>
 
 	<modules>

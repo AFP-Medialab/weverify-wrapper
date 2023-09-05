@@ -33,7 +33,7 @@ application:
       msg: Service is Up
       
     twint:
-      command: docker run --rm --network dev_esnet -i ttwo:1.2
+      command: docker run --rm --network dev_esnet -i ttwo:1.3
       limit: 
         default: ${TWINT_LIMIT_DEFAULT:15000}
         min: ${TWINT_LIMIT_MIN:15000}
@@ -48,7 +48,7 @@ application:
       grp-nb-max-threads: 4
       twint_request_maximum_days : 15
       twint_big_request_subdivisions : 6
-      twint_thread_nb_restart_on_error : ${RESTART_TTWO:1}
+      twint_thread_nb_restart_on_error : ${RESTART_TTWO:3}
     
     twitie:
       isSpacyVersion: ${TWITIE_IS_SPACY:true}

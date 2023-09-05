@@ -123,8 +123,8 @@ public class TwintThread {
 
 		Boolean error_occurred = false;
 		Integer nb_tweets = -1;
-		int max_reading = 20;
-		int reading = 0;
+		//int max_reading = 20;
+		//int reading = 0;
 		while ((LoggerString = stdError.readLine()) != null) {
 
 			if (LoggerString.contains("Tweets collected")) {
@@ -133,17 +133,17 @@ public class TwintThread {
 				nb_tweets = Integer.parseInt(str);
 				Logger.info("Successfully collected: " + nb_tweets + " " + got);
 				//Logger.debug("reading {} max {} nb_tweets {}", reading, max_reading, nb_tweets);
-				if(reading > max_reading && nb_tweets ==0) {
+				/*if(reading > max_reading && nb_tweets ==0) {
 					process.destroy();
 					Logger.info("stop process");
-				}
+				}*/
 					
 
 			} else if(!LoggerString.trim().isEmpty()){
 				Logger.error(LoggerString);
 			}
 			// error_occurred = true;
-			reading ++;
+			//reading ++;
 		}
 
 		while ((LoggerString = stdInput.readLine()) != null) {
@@ -165,7 +165,7 @@ public class TwintThread {
 			result = callProcess(processBuilder, "tweets");
 		} catch (IOException e) {
 			Logger.error("I/O Exception stop process");
-			result = 0;
+			//result = 0;
 			//e.printStackTrace();
 		}
 		return result;
