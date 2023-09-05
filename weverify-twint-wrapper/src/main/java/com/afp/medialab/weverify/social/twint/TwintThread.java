@@ -131,8 +131,8 @@ public class TwintThread {
 				String str = LoggerString.split("Tweets collected: ")[1].split(" ")[0];
 				str = str.substring(0, str.length() - 2);
 				nb_tweets = Integer.parseInt(str);
-				Logger.debug("Successfully collected: " + nb_tweets + " " + got);
-				Logger.info("reading {} max {} nb_tweets {}", reading, max_reading, nb_tweets);
+				Logger.info("Successfully collected: " + nb_tweets + " " + got);
+				//Logger.debug("reading {} max {} nb_tweets {}", reading, max_reading, nb_tweets);
 				if(reading > max_reading && nb_tweets ==0) {
 					process.destroy();
 					Logger.info("stop process");
