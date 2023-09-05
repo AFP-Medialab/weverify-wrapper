@@ -1,13 +1,3 @@
-FROM eclipse-temurin:17 as jre-build
-
-RUN $JAVA_HOME/bin/jlink \
-         --add-modules java.base \
-         --strip-debug \
-         --no-man-pages \
-         --no-header-files \
-         --compress=2 \
-         --output /javaruntime
-
 FROM registry-medialab.afp.com/ttwo:1.2
 
 ENV USER_ID=15555
@@ -18,7 +8,7 @@ ENV GROUP_NAME=tsna
 #RUN mkdir -p /usr/share/man/man1 && apt-get update --allow-releaseinfo-change && \
 #      apt install openjdk-11-jre tini -y && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 ENV JAVA_HOME=/opt/java/openjdk
-COPY --from=jre-build /javaruntime $JAVA_HOME
+COPY --from=eclipse-temurin:17-jre-jammy $JAVA_HOME $JAVA_HOME
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # install ffmpeg
