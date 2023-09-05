@@ -13,7 +13,7 @@ ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
 # install ffmpeg
 RUN echo "deb http://security.debian.org/debian-security bullseye-security contrib non-free" >> /etc/apt/sources.list && \		
-		apt-get update && apt-get install ffmpeg x264 -y && rm -rf /var/lib/apt/lists/* /tmp/*
+		apt-get update && apt-get install tini ffmpeg x264 -y && rm -rf /var/lib/apt/lists/* /tmp/*
 		
 RUN groupadd -g $GROUP_ID $GROUP_NAME  && \
     adduser --shell /sbin/nologin --disabled-password \
