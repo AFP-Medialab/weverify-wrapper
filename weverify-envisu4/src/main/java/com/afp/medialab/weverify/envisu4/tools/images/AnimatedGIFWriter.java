@@ -26,6 +26,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 import java.awt.image.IndexColorModel;
 import java.awt.image.Raster;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -36,6 +37,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -1818,6 +1820,32 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 			finishWrite(output);
 		}
 
+	}
+
+	@Override
+	public byte[] convert(String url, String base64Filter, ByteArrayOutputStream output, int delay, boolean loop)
+			throws Exception {
+		Logger.debug("Use AnimatedGif Implementation");
+		ByteArrayInputStream bis = null;
+		try {
+			this.isApplyDither = loop;
+			prepareForWrite(output, -1, -1);
+			BufferedImage next = ImageIO.read(new URL(url));
+			writeFrame(output, next, delay);
+			
+			String[] parts = base64Filter.split(",");
+			String image = parts[1];
+			byte[] imageByte = Base64.decodeBase64(image);
+			bis = new ByteArrayInputStream(imageByte);
+			 next = ImageIO.read(bis);
+			writeFrame(output, next, delay);
+
+			output.write(IMAGE_TRAILER);
+			return output.toByteArray();
+		} finally {
+			bis.close();
+			finishWrite(output);
+		}
 	}
 
 	public byte[] convertFile(String[] images, ByteArrayOutputStream output, int delay, boolean loop) throws Exception {
