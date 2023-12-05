@@ -79,6 +79,13 @@ public class AlphaGifWriter implements ICreateAnimatedGif {
 		convert(images, outputStream, delay, loop, null, null);
 	}
 
+	@Override
+	public byte[] convertBase64(String original, String base64Filter, ByteArrayOutputStream output, int delay,
+			boolean loop) throws Exception {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/**
 	 * Convert sequence diagram to gif diagram
 	 * 
