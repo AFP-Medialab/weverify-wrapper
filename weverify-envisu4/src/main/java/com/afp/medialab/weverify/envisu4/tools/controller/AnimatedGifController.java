@@ -30,11 +30,10 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
@@ -47,6 +46,7 @@ import com.afp.medialab.weverify.envisu4.tools.controller.exception.ServiceError
 import com.afp.medialab.weverify.envisu4.tools.controller.exception.VideoCreationException;
 import com.afp.medialab.weverify.envisu4.tools.images.ICreateAnimatedGif;
 import com.afp.medialab.weverify.envisu4.tools.models.AnimatedGif;
+import com.afp.medialab.weverify.envisu4.tools.models.CreateAnimatedBase64;
 import com.afp.medialab.weverify.envisu4.tools.models.CreateAnimatedBaseFilterRequest;
 import com.afp.medialab.weverify.envisu4.tools.models.CreateAnimatedGifHistory;
 import com.afp.medialab.weverify.envisu4.tools.models.CreateAnimatedRequest;
@@ -74,8 +74,7 @@ public class AnimatedGifController {
 	private static Logger Logger = LoggerFactory.getLogger(AnimatedGifController.class);
 
 	@Operation(summary = "Create animated Video", description = "Create an animated Video from several image URLs")
-	@RequestMapping(path = {
-			"/video" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "video/mp4")
+	@PostMapping(path = { "/video" }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = "video/mp4")
 	public ResponseEntity<Resource> createAnimatedVideoforURL(
 			@RequestBody @Valid CreateAnimatedRequest createAnimatedGifRequest, @AuthenticationPrincipal Jwt principal)
 			throws Exception {
@@ -100,7 +99,7 @@ public class AnimatedGifController {
 	}
 
 	/**
-	 * Create video from animated gif
+	 * Generic response for Video
 	 * 
 	 * @param content
 	 * @param md5sum
@@ -113,14 +112,15 @@ public class AnimatedGifController {
 		byte[] videoContent = ffmpegConvertor.convert(content, md5sum, delay);
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
 		headers.add("videoId", md5sum);
+		headers.add("Content-Type", "video/mp4");
 		ResponseEntity<Resource> response = new ResponseEntity<Resource>(new ByteArrayResource(videoContent), headers,
 				HttpStatus.OK);
 		return response;
 	}
 
 	@Operation(summary = "Create animated Gif", description = "Create an animated Gif from several image URLs")
-	@RequestMapping(path = {
-			"/animated" }, method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.IMAGE_GIF_VALUE)
+	@PostMapping(path = {
+			"/animated" }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.IMAGE_GIF_VALUE)
 	public ResponseEntity<Resource> createAnimatedGifForURL(
 			@RequestBody @Valid CreateAnimatedRequest createAnimatedGifRequest, @AuthenticationPrincipal Jwt principal)
 			throws Exception {
@@ -146,9 +146,17 @@ public class AnimatedGifController {
 		}
 	}
 
+	/**
+	 * Generic response for animated GIF
+	 * 
+	 * @param content
+	 * @param md5sum
+	 * @return
+	 */
 	private ResponseEntity<Resource> createGifResponse(byte[] content, String md5sum) {
 		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
 		headers.add("imageId", md5sum);
+		headers.add("Content-Type", MediaType.IMAGE_GIF_VALUE);
 		ResponseEntity<Resource> response = new ResponseEntity<Resource>(new ByteArrayResource(content), headers,
 				HttpStatus.OK);
 		return response;
@@ -163,13 +171,7 @@ public class AnimatedGifController {
 		Logger.info("POST /animatedfilter - userId: {}", principal.getClaimAsString("sub"));
 		try {
 			byte[] content = createAnimatedFilterGif(filterRequest);
-			String md5sum = DigestUtils.md5Hex(content);
-			storeMediaContent(content, md5sum);
-			if (filterRequest.isCreateVideo()) {
-				return createVideo(content, md5sum, filterRequest.getDelay());
-			} else {
-				return createGifResponse(content, md5sum);
-			}
+			return buildResponse(content, filterRequest.isCreateVideo(), filterRequest.getDelay());
 		} catch (IIOException e) {
 			Logger.error("Failed loading resource", e);
 			throw new AnimatedGifCreationException(ServiceErrorCode.ANIMATED_GIF_URL_LOAD_FAILED,
@@ -182,8 +184,40 @@ public class AnimatedGifController {
 		}
 	}
 
+	@Operation(summary = "Create animated Gif/Video with Base64", description = "Create an animation with an original URL and a Base64 content")
+	@PostMapping(path = "/animatedbase64", consumes = MediaType.APPLICATION_JSON_VALUE, produces = {
+			MediaType.IMAGE_GIF_VALUE, "video/mp4" })
+	public ResponseEntity<Resource> createAnimatedBase64Request(@RequestBody @Valid CreateAnimatedBase64 request,
+			@AuthenticationPrincipal Jwt principal) throws Exception {
+		Logger.info("POST /animatedbase64 - userId: {}", principal.getClaimAsString("sub"));
+		try {
+			byte[] content = createAnimatedBaseGif(request);
+			return buildResponse(content, request.createVideo(), request.delay());
+		} catch (IIOException e) {
+			Logger.error("Failed loading resource", e);
+			throw new AnimatedGifCreationException(ServiceErrorCode.ANIMATED_GIF_URL_LOAD_FAILED,
+					"Fail loading input resource");
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			Logger.error("General error", e);
+			throw new AnimatedGifCreationException(ServiceErrorCode.ANIMATED_GIF_CREATION_FAILED,
+					"Error creating image ");
+		}
+	}
+
+	private ResponseEntity<Resource> buildResponse(byte[] content, boolean video, int delay)
+			throws VideoCreationException {
+		String md5sum = DigestUtils.md5Hex(content);
+		storeMediaContent(content, md5sum);
+		if (video) {
+			return createVideo(content, md5sum, delay);
+		} else {
+			return createGifResponse(content, md5sum);
+		}
+	}
+
 	@Operation(summary = "get stored animated Gif", description = "Get animated Gif generated from database")
-	@RequestMapping(path = { "/animated/{imageId}" }, method = RequestMethod.GET, produces = MediaType.IMAGE_GIF_VALUE)
+	@GetMapping(path = { "/animated/{imageId}" }, produces = MediaType.IMAGE_GIF_VALUE)
 	public Resource getImageFromId(@PathVariable String imageId, @AuthenticationPrincipal Jwt principal) {
 		Logger.info("GET /animated/{} - user_id: {}", imageId, principal.getClaimAsString("sub"));
 		byte[] content = getStoreContent(imageId);
@@ -192,8 +226,7 @@ public class AnimatedGifController {
 	}
 
 	@Operation(summary = "create mp4 from stored animated gif", description = "Create mp4 from stored animated giffrom database")
-	@RequestMapping(path = { "/video/{imageId}",
-			"/video/{imageId}/{delay}" }, method = RequestMethod.GET, produces = "video/mp4")
+	@GetMapping(path = { "/video/{imageId}", "/video/{imageId}/{delay}" }, produces = "video/mp4")
 	public Resource getVideofromId(@PathVariable String imageId, @PathVariable() Optional<Integer> delay,
 			@AuthenticationPrincipal Jwt principal) throws AnimatedGifCreationException {
 		Logger.info("GET /video/{} - user_id: {}", imageId, principal.getClaimAsString("sub"));
@@ -215,7 +248,7 @@ public class AnimatedGifController {
 	}
 
 	@PreAuthorize("hasAuthority('WEVERIFY_MNG')")
-	@RequestMapping(value = "/animated/history", params = "limit", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/animated/history", params = "limit", produces = MediaType.APPLICATION_JSON_VALUE)
 	public CreateAnimatedGifHistory getCreateImageHistory(@RequestParam(defaultValue = "5") int limit,
 			@AuthenticationPrincipal Jwt principal) {
 		Logger.info("GET /animated/history - user_id: {}", principal.getClaimAsString("sub"));
@@ -270,6 +303,20 @@ public class AnimatedGifController {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		try {
 			byte[] content = createAnimatedGif.convert(url, base64filter, output, delay, true);
+			return content;
+		} finally {
+			output.close();
+		}
+
+	}
+
+	private byte[] createAnimatedBaseGif(CreateAnimatedBase64 request) throws Exception {
+		String original = request.original();
+		String maskFilter = request.maskFilter();
+		int delay = request.delay();
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		try {
+			byte[] content = createAnimatedGif.convertBase64(original, maskFilter, output, delay, true);
 			return content;
 		} finally {
 			output.close();

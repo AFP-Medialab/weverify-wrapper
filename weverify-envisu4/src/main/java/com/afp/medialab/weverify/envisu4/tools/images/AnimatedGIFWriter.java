@@ -587,7 +587,7 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 	}
 
 	private int ratio(int imageSize) {
-		System.out.println(imageSize);
+		Logger.info("process large video({} ", imageSize);
 		int ratio = Math.floorDiv(60000, imageSize);
 		return ratio;
 	}
@@ -1846,6 +1846,31 @@ public class AnimatedGIFWriter implements ICreateAnimatedGif {
 			bis.close();
 			finishWrite(output);
 		}
+	}
+	
+
+	@Override
+	public byte[] convertBase64(String original, String base64Filter, ByteArrayOutputStream output, int delay,
+			boolean loop) throws Exception {
+		ByteArrayInputStream bis = null;
+		try {
+			String [] baseImages = {original, base64Filter};
+			this.isApplyDither = loop;
+			prepareForWrite(output, -1, -1);
+			for (String baseImage : baseImages) {
+				String[] parts = baseImage.split(",");
+				String image = parts[1];
+				byte[] imageByte = Base64.decodeBase64(image);
+				bis = new ByteArrayInputStream(imageByte);
+				BufferedImage next = ImageIO.read(bis);
+				writeFrame(output, next, delay);
+			}
+			output.write(IMAGE_TRAILER);
+			return output.toByteArray();
+		} finally {
+			finishWrite(output);
+		}
+		
 	}
 
 	public byte[] convertFile(String[] images, ByteArrayOutputStream output, int delay, boolean loop) throws Exception {
