@@ -119,20 +119,16 @@ public class AnimatedGifController {
 	}
 
 	@Operation(summary = "Create animated Gif", description = "Create an animated Gif from several image URLs")
-	@PostMapping(path = {
-			"/animated" }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.IMAGE_GIF_VALUE)
+	@PostMapping(path = { "/animated" }, consumes = MediaType.APPLICATION_JSON_VALUE, produces = {
+			MediaType.IMAGE_GIF_VALUE, "video/mp4" })
 	public ResponseEntity<Resource> createAnimatedGifForURL(
 			@RequestBody @Valid CreateAnimatedRequest createAnimatedGifRequest, @AuthenticationPrincipal Jwt principal)
 			throws Exception {
 		Logger.info("POST /animated - userId: {}", principal.getClaimAsString("sub"));
 		try {
 			byte[] content = createAnimatedGif(createAnimatedGifRequest);
-			String md5sum = DigestUtils.md5Hex(content);
-			storeMediaContent(content, md5sum);
-
-			ResponseEntity<Resource> response = createGifResponse(content, md5sum);
-			return response;
-			// return new ByteArrayResource(content);
+			return buildResponse(content, createAnimatedGifRequest.isCreateVideo(),
+					createAnimatedGifRequest.getDelay());
 
 		} catch (IIOException e) {
 			Logger.error("Failed loading resource", e);
