@@ -200,7 +200,7 @@ public class IpolProxyServiceController {
 	 */
 	private IpolHomographicResponse buildResponse(ResponseEntity<IpolHomographicResponse> response) {
 		IpolHomographicResponse ipolResponse = response.getBody();
-		if (ipolResponse.getStatus().equals("OK")) {
+		if (ipolResponse.getKey() != null) {
 			Results results = new Results();
 			ipolResponse.setResults(results);
 			String output0 = IpolPathConstant.IPOL_RESULTS_PATH + ipolResponse.getKey() + "/output_0.jpg";
