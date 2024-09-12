@@ -106,14 +106,19 @@ spring:
         enabled: false
 
 management:
+  server:
+    port: 8081
   endpoints:
-    enabled-by-default: false
+    enabled-by-default: true
     web:
       exposure:
         include:
           - health
           - info
           - loggers
+          - mappings
+          - metrics
+          - prometheus
       base-path: /manage
       
   endpoint:
