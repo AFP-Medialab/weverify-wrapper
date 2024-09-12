@@ -55,7 +55,7 @@ public class MultiSecurityConfig {
 				"/open/**", "/ipol/homographic/result/**"
 				// -- Authentication services
 				, "/api/v1/auth/registration", "/api/v1/auth/accesscode", "/api/v1/auth/login",
-				"/api/v1/auth/refreshtoken", "/api/v1/auth/logout" };
+				"/api/v1/auth/refreshtoken", "/api/v1/auth/logout", "/manage/**" };
 
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
@@ -66,8 +66,8 @@ public class MultiSecurityConfig {
 		}
 	}
 
-	@Configuration
-	@Order(1)
+	//@Configuration
+	//@Order(1)
 	/**
 	 * Actuator Basic Auth
 	 * 
